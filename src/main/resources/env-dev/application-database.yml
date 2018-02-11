@@ -1,0 +1,72 @@
+spring:
+  datasource:
+    type: com.alibaba.druid.pool.DruidDataSource
+    # 主库数据源
+    master:
+      url: jdbc:mysql://localhost:3306/demo?useUnicode=true&characterEncoding=utf-8
+      username: root
+      password: xiaogch
+      driverClassName: com.mysql.jdbc.Driver
+      # 连接池启动时创建的初始化连接数量（默认值为0）
+      initialSize: 10
+      # 连接池中可同时连接的最大的连接数
+      maxActive: 100
+      # 连接池中最小的空闲的连接数，低于这个数量会被创建新的连接
+      minIdle: 10
+      # 最大等待时间，当没有可用连接时，连接池等待连接释放的最大时间，超过该时间限制会抛出异常，如果设置-1表示无限等待
+      maxWait: 60000
+
+      # 打开PSCache，并且指定每个连接上PSCache的大小
+      poolPreparedStatements: true
+      maxPoolPreparedStatementPerConnectionSize: 20
+      #
+      validationQuery: select 1 from dual
+      #
+      validationQueryTimeout: 10000
+      # 就是在进行borrowObject进行处理时，对拿到的connection进行validateObject校验
+      testOnBorrow: false
+      # 就是在进行returnObject对返回的connection进行validateObject校验
+      testOnReturn: false
+      testWhileIdle: true
+
+      # 打开检查,用异步线程evict进行检查
+      #
+      timeBetweenEvictionRunsMillis: 3000
+      #
+      minEvictableIdleTimeMillis: 300000
+      filters: stat,wall,log4j2
+    # 从库数据源
+    slave:
+      url: jdbc:mysql://localhost:3306/demo?useUnicode=true&characterEncoding=utf-8
+      username: root
+      password: xiaogch
+      driverClassName: com.mysql.jdbc.Driver
+      # 连接池启动时创建的初始化连接数量（默认值为0）
+      initialSize: 10
+      # 连接池中可同时连接的最大的连接数
+      maxActive: 100
+      # 连接池中最小的空闲的连接数，低于这个数量会被创建新的连接
+      minIdle: 10
+      # 最大等待时间，当没有可用连接时，连接池等待连接释放的最大时间，超过该时间限制会抛出异常，如果设置-1表示无限等待
+      maxWait: 60000
+
+      # 打开PSCache，并且指定每个连接上PSCache的大小
+      poolPreparedStatements: true
+      maxPoolPreparedStatementPerConnectionSize: 20
+      #
+      validationQuery: select 1 from dual
+      #
+      validationQueryTimeout: 10000
+      # 就是在进行borrowObject进行处理时，对拿到的connection进行validateObject校验
+      testOnBorrow: false
+      # 就是在进行returnObject对返回的connection进行validateObject校验
+      testOnReturn: false
+      testWhileIdle: true
+
+      # 打开检查,用异步线程evict进行检查
+      #
+      timeBetweenEvictionRunsMillis: 3000
+      #
+      minEvictableIdleTimeMillis: 300000
+      filters: stat,wall,log4j2
+

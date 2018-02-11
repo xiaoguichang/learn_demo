@@ -1,0 +1,16 @@
+# 服务器配置
+server:
+  port: 8081
+  context-path: /demo
+  application: spring-boot test
+  env: dev
+
+spring:
+  profiles:
+    include: database,redis
+  zookeeper:
+      serverPath: /system/config/server
+      connectStr: 127.0.0.1:2181
+      sessionTimeout: 60000
+      connectTimeout: 60000
+      reconnectTimes: 3
