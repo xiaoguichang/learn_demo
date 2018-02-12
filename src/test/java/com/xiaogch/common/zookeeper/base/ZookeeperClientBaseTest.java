@@ -1,7 +1,10 @@
 package com.xiaogch.common.zookeeper.base;
 
 import com.xiaogch.common.zookeeper.ZookeeperConfig;
+import org.apache.zookeeper.CreateMode;
+import org.apache.zookeeper.ZooDefs;
 import org.apache.zookeeper.ZooKeeper;
+import org.apache.zookeeper.data.Stat;
 import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -21,7 +24,7 @@ public class ZookeeperClientBaseTest {
     @Before
     public void setUp() throws Exception {
         zookeeperConfig = new ZookeeperConfig();
-        zookeeperConfig.setConnectStr("127.0.0.1:2181");
+        zookeeperConfig.setConnectStr("127.0.0.1:2181,127.0.0.1:2182,127.0.0.1:2183");
         zookeeperConfig.setSessionTimeout(60*1000);
         zookeeperConfig.setReconnectTimes(60*1000);
     }
@@ -33,12 +36,20 @@ public class ZookeeperClientBaseTest {
         logger.info("connection sessionId {}" , zooKeeper.getSessionId());
         logger.info("connection sessionPassword {}" , zooKeeper.getSessionPasswd());
         logger.info("connection state {}" , zooKeeper.getState());
+        String path = "/system";
+        Stat stat = zooKeeper.exists(path , false);
+        if (stat == null) {
+            zooKeeper.create(path , "hello".getBytes() , ZooDefs.Ids.OPEN_ACL_UNSAFE , CreateMode.PERSISTENT);
+        }
 
-        GetChildrenWatchHandler getChildrenWatchHandler = new GetChildrenWatchHandler(zooKeeper , "/system");
+        GetChildrenHandler getChildrenWatchHandler = new GetChildrenHandler(zooKeeper , path);
         List<String> list = getChildrenWatchHandler.getChildren();
         for (String child : list) {
-            logger.info("child {}" , child);
+//            logger.info("child {}" , child);
         }
+
+        GetDataHandler getDataHandler = new GetDataHandler(zooKeeper , path);
+        getDataHandler.getData();
 
         while (true) {
             Thread.sleep(1000);

@@ -16,12 +16,12 @@ import org.springframework.web.bind.annotation.ResponseBody;
  */
 
 @ControllerAdvice
-public class RestControllerExceptionHandler {
+public class ControllerExceptionHandler {
 
     @Autowired
     FastJsonConfig fastJsonConfig;
 
-    static Logger logger = LoggerFactory.getLogger(RestControllerExceptionHandler.class);
+    static Logger logger = LoggerFactory.getLogger(ControllerExceptionHandler.class);
 
 
     @ExceptionHandler(Exception.class)
