@@ -8,16 +8,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
 
-/**
- * ProjectName: demo<BR>
- * File name: CommonUtil.java <BR>
- * Author: guich <BR>
- * Project: demo <BR>
- * Version: v 1.0 <BR>
- * Date: 2018/2/12 14:46 <BR>
- * Description: <BR>
- * Function List:  <BR>
- */
 public class GetDataHandler extends WatchedEventHandler {
 
     private Stat stat = new Stat();
