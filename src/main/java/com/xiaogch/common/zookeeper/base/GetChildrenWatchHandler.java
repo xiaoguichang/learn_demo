@@ -27,7 +27,7 @@ public class GetChildrenWatchHandler {
     public List<String> getChildren() {
         try {
             return zooKeeper.getChildren(path, (WatchedEvent event) -> {
-                this.proccess(event);
+                this.process(event);
             });
         } catch (Exception e) {
             if (e instanceof InterruptedException) {
@@ -37,7 +37,7 @@ public class GetChildrenWatchHandler {
         }
     }
 
-    public void proccess (WatchedEvent watchedEvent) {
+    public void process (WatchedEvent watchedEvent) {
         logger.info("{}" , watchedEvent);
         EventType eventType = watchedEvent.getType();
         switch (eventType) {
@@ -63,7 +63,7 @@ public class GetChildrenWatchHandler {
 
         try {
             zooKeeper.getChildren(watchedEvent.getPath(), (WatchedEvent event) -> {
-                this.proccess(event);
+                this.process(event);
             });
         } catch (Exception e) {
             throw new RuntimeException(e);
