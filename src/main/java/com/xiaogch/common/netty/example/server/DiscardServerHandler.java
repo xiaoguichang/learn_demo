@@ -1,4 +1,4 @@
-package com.xiaogch.common.netty.example.discard;
+package com.xiaogch.common.netty.example.server;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
@@ -7,8 +7,6 @@ import io.netty.channel.ChannelInboundHandler;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.ChannelPipeline;
 import io.netty.util.ReferenceCountUtil;
-
-import java.util.Arrays;
 
 /**
  * ProjectName: demo<BR>
