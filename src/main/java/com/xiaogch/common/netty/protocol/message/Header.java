@@ -25,7 +25,7 @@ public final class Header {
     private int crcCode = 0xabef0101;
 
     /** 消息长度 */
-    private int length;
+    private int length ;
 
     /** 会话id*/
     private long sessionId;
@@ -79,6 +79,16 @@ public final class Header {
         return type;
     }
 
+    /**
+     * @param type 消息类型，取值如下：
+     * 0：业务请求消息；
+     * 1：业务响应消息；
+     * 2：业务ONE WAY 消息（既是请求也是响应）；
+     * 3：握手请求消息；
+     * 4：握手响应消息；
+     * 5：心跳请求消息（PING）；
+     * 6：心跳响应消息（PONG）；
+     */
     public Header setType(byte type) {
         this.type = type;
         return this;
