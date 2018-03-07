@@ -27,7 +27,9 @@ public class LoginReqHandler extends ChannelInboundHandlerAdapter {
      */
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
+        System.out.println("send login request begin ... ");
         ctx.writeAndFlush(buildLoginReqMessage());
+        System.out.println("send login request end ... ");
     }
 
     /**
@@ -43,8 +45,9 @@ public class LoginReqHandler extends ChannelInboundHandlerAdapter {
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
 //        super.channelRead(ctx, msg);
         Message message = (Message) msg;
+        System.out.println("LoginReqHandler " + message);
         if (message != null && message.getHeader() != null
-                && message.getHeader().getType() == MessageType.HANDSHAKE_RES.value()) {
+                && message.getHeader().getType() == MessageType.HANDSHAKE_RESP.value()) {
             byte loginResult = (byte) message.getBody();
             if (loginResult != (byte) 0) {
                 // 握手失败
@@ -57,7 +60,6 @@ public class LoginReqHandler extends ChannelInboundHandlerAdapter {
             ctx.fireChannelRead(msg);
         }
     }
-
 
     public Message buildLoginReqMessage() {
         Message message = new Message();

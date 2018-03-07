@@ -6,6 +6,7 @@ import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
+import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.timeout.ReadTimeoutHandler;
 
 import java.net.InetSocketAddress;
@@ -34,6 +35,7 @@ public class ProtocolClient {
             Bootstrap bootstrap = new Bootstrap();
             bootstrap.group(group)
                     .option(ChannelOption.TCP_NODELAY , true)
+                    .channel(NioSocketChannel.class)
                     .handler(new ChannelInitializer<SocketChannel>() {
                         /**
                          * This method will be called once the {@link Channel} was registered. After the method returns this instance
@@ -60,19 +62,21 @@ public class ProtocolClient {
                     new InetSocketAddress(host , port)).sync();
             channelFuture.channel().closeFuture().sync();
         } finally {
-            executorService.execute(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        TimeUnit.SECONDS.sleep(5);
-                        connect(host, port);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                        Thread.interrupted();
-                    }
+            // 重连
+            executorService.execute(()->{
+                try {
+                    TimeUnit.SECONDS.sleep(5);
+                    connect(host, port);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                    Thread.interrupted();
                 }
             });
         }
+    }
+
+    public static void main(String...argvs) throws InterruptedException {
+        new ProtocolClient().connect("127.0.0.1" , 10002);
     }
 
 }

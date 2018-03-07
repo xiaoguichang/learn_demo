@@ -47,6 +47,7 @@ public final class MessageEncoder extends MessageToByteEncoder<Message> {
      */
     @Override
     protected void encode(ChannelHandlerContext ctx, Message msg, ByteBuf out) throws Exception {
+
         out.writeInt(msg.getHeader().getCrcCode());
         out.writeInt(msg.getHeader().getLength());
         out.writeLong(msg.getHeader().getSessionId());
@@ -61,7 +62,7 @@ public final class MessageEncoder extends MessageToByteEncoder<Message> {
                 out.writeBytes(keyArray);
                 encode(value , out);
             } catch (UnsupportedEncodingException e) {
-                throw new RuntimeException(e);
+                e.printStackTrace();
             }
         });
 
@@ -71,7 +72,8 @@ public final class MessageEncoder extends MessageToByteEncoder<Message> {
             out.writeInt(0);
         }
 
-        out.setInt(4 , out.readableBytes());
+        out.setInt(4 , out.readableBytes() - 8);
+        System.out.println("encode success ...");
     }
 
     public void encode(Object value , ByteBuf out) {
@@ -84,12 +86,12 @@ public final class MessageEncoder extends MessageToByteEncoder<Message> {
             marshaller.finish();
             out.setInt(lengthPos, out.writerIndex() - lengthPos - 4);
         } catch(IOException e){
-                throw new RuntimeException(e);
+            e.printStackTrace();
         } finally{
             try {
                 marshaller.close();
             } catch (IOException e) {
-                throw new RuntimeException(e);
+                e.printStackTrace();
             }
         }
     }

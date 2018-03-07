@@ -43,20 +43,23 @@ public class LoginAuthRespHandler extends ChannelInboundHandlerAdapter {
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
         Message requestMsg = (Message) msg;
+
+        System.out.println(requestMsg.toString());
         if (requestMsg != null && requestMsg.getHeader() != null &&
                 requestMsg.getHeader().getType() == MessageType.HANDSHAKE_REQ.value()) {
 
             InetSocketAddress inetSocketAddress = (InetSocketAddress) ctx.channel().remoteAddress();
             String nodeFlag = inetSocketAddress.toString();
             Message responseMsg;
-            if (nodeCheck.containsKey(nodeFlag) || whiteMap.containsKey(inetSocketAddress.getAddress().getHostAddress())) {
-                responseMsg = buildMessage((byte)-1);
-            } else {
+            if (!nodeCheck.containsKey(nodeFlag) && whiteMap.containsKey(inetSocketAddress.getAddress().getHostAddress())) {
+                System.out.println("register nodeFlag : " + nodeFlag);
                 nodeCheck.put(nodeFlag , true);
                 responseMsg = buildMessage((byte)0);
+            } else {
+                responseMsg = buildMessage((byte)-1);
             }
             System.out.println("Login request is : " + requestMsg + " response is :" + responseMsg);
-            ctx.writeAndFlush(msg);
+            ctx.writeAndFlush(responseMsg);
         } else {
             ctx.fireChannelRead(msg);
         }
@@ -66,7 +69,7 @@ public class LoginAuthRespHandler extends ChannelInboundHandlerAdapter {
     private Message buildMessage(Object body){
         Message message = new Message();
         Header header = new Header();
-        header.setType(MessageType.HANDSHAKE_RES.value());
+        header.setType(MessageType.HANDSHAKE_RESP.value());
         message.setHeader(header);
         message.setBody(body);
         return message;
@@ -83,9 +86,31 @@ public class LoginAuthRespHandler extends ChannelInboundHandlerAdapter {
      */
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
+
         InetSocketAddress inetSocketAddress = (InetSocketAddress) ctx.channel().remoteAddress();
+        System.out.println("clear nodeFlag : " + inetSocketAddress.toString());
         nodeCheck.remove(inetSocketAddress.toString());
         ctx.close();
         ctx.fireExceptionCaught(cause);
+    }
+
+    /**
+     * Calls {@link ChannelHandlerContext#fireChannelInactive()} to forward
+     * to the next {@link ChannelInboundHandler} in the {@link ChannelPipeline}.
+     * <p>
+     * Sub-classes may override this method to change behavior.
+     *
+     * @param ctx
+     */
+    @Override
+    public void channelInactive(ChannelHandlerContext ctx) throws Exception {
+        InetSocketAddress inetSocketAddress = (InetSocketAddress) ctx.channel().remoteAddress();
+        String nodeFlag = inetSocketAddress.toString();
+
+        if (nodeCheck.containsKey(nodeFlag)) {
+            System.out.println("clear nodeFlag : " + nodeFlag);
+            nodeCheck.remove(nodeFlag);
+        }
+        super.channelInactive(ctx);
     }
 }

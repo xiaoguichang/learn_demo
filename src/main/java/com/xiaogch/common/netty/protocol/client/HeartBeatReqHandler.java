@@ -33,14 +33,16 @@ public class HeartBeatReqHandler extends ChannelInboundHandlerAdapter {
      */
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+
         Message reqMsg = (Message) msg;
+        System.out.println("HeartBeatReqHandler " + reqMsg);
 
         if (reqMsg != null && reqMsg.getHeader() != null
-                && reqMsg.getHeader().getType() == MessageType.HANDSHAKE_RES.value()) {
+                && reqMsg.getHeader().getType() == MessageType.HANDSHAKE_RESP.value()) {
             System.out.println("client receive server handshake response , message is : " + reqMsg);
             heartBeatTask = ctx.executor().scheduleAtFixedRate(new HeartBeatTask(ctx) , 0 , 5000 , TimeUnit.MILLISECONDS);
         } else if (reqMsg != null && reqMsg.getHeader() != null
-                && reqMsg.getHeader().getType() == MessageType.HEARTBEAT_RES.value()) {
+                && reqMsg.getHeader().getType() == MessageType.HEARTBEAT_RESP.value()) {
             System.out.println("client receive server heartbeat response , message is : " + reqMsg);
         } else {
             ctx.fireChannelRead(ctx);

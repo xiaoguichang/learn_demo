@@ -6,8 +6,10 @@ import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ByteToMessageDecoder;
 import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
-import io.netty.handler.codec.marshalling.MarshallingEncoder;
-import org.jboss.marshalling.*;
+import org.jboss.marshalling.MarshallerFactory;
+import org.jboss.marshalling.Marshalling;
+import org.jboss.marshalling.MarshallingConfiguration;
+import org.jboss.marshalling.Unmarshaller;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -47,6 +49,8 @@ public class MessageDecoder extends LengthFieldBasedFrameDecoder {
      */
     @Override
     protected Object decode(ChannelHandlerContext ctx, ByteBuf in) throws Exception {
+
+        System.out.println("decode message begin ...");
         ByteBuf frame = (ByteBuf) super.decode(ctx, in);
         if (frame != null) {
             Message message = new Message();
@@ -73,11 +77,13 @@ public class MessageDecoder extends LengthFieldBasedFrameDecoder {
             }
             header.setAttachment(attachment);
             message.setHeader(header);
-            if (in.readableBytes() > 4) {
-                message.setBody(decode(in));
+            if (frame.readableBytes() > 4) {
+                message.setBody(decode(frame));
             }
+            System.out.println("decode message result is " + message);
             return message;
         }
+        System.out.println("decode message end ...");
         return null;
     }
 
@@ -92,14 +98,15 @@ public class MessageDecoder extends LengthFieldBasedFrameDecoder {
             in.readerIndex(in.readerIndex() + objectSize);
             return object;
         } catch(Exception e){
-            throw new RuntimeException(e);
+            e.printStackTrace();
         } finally{
             try {
                 unmarshaller.close();
             } catch (IOException e) {
-                throw new RuntimeException(e);
+                e.printStackTrace();
             }
         }
+        return null;
     }
 
 }
