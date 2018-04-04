@@ -148,6 +148,12 @@
 			<version>4.1.22.Final</version>
 		</dependency>
 
+		<dependency>
+			<groupId>tk.mybatis</groupId>
+			<artifactId>mapper</artifactId>
+			<version>4.0.1</version>
+		</dependency>
+
 	</dependencies>
 
 	<profiles>
