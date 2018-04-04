@@ -1,6 +1,6 @@
 package com.xiaogch.common.redis;
 
-public class RedisException extends Exception {
+public class RedisException extends RuntimeException {
 
     public RedisException() {
         super();
