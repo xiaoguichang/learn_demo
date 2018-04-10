@@ -26,4 +26,6 @@ public class DatasourceContextHolder {
         return threadLocal.get();
     }
 
+    public static void clearDatasourceType(){ threadLocal.remove(); }
+
 }

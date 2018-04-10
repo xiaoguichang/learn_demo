@@ -1,5 +1,7 @@
 package com.xiaogch.common.db;
 
+import org.springframework.beans.factory.InitializingBean;
+
 import java.util.List;
 
 /**
@@ -12,12 +14,20 @@ import java.util.List;
  * Description: <BR>
  * Function List:  <BR>
  */
-public class BaseServiceImpl<T> implements BaseService<T> {
+public abstract class BaseServiceImpl<T> implements BaseService<T> , InitializingBean {
 
     private BaseDAO baseDAO;
 
     public BaseServiceImpl() {
 
+    }
+
+    public BaseDAO getBaseDAO() {
+        return baseDAO;
+    }
+
+    public void setBaseDAO(BaseDAO baseDAO) {
+        this.baseDAO = baseDAO;
     }
 
     public BaseServiceImpl(BaseDAO baseDAO) {

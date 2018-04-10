@@ -19,7 +19,7 @@ import java.io.Serializable;
  * Description: <BR>
  * Function List:  <BR>
  */
-public interface BaseDAO<T , PK extends Serializable> extends
+public interface BaseDAO<PK extends Serializable, T> extends
         BaseSelectMapper<T> , BaseUpdateMapper<T> ,
         BaseInsertMapper<T> , BaseDeleteMapper<T> ,
         MySqlMapper<T> , Mapper<T> {

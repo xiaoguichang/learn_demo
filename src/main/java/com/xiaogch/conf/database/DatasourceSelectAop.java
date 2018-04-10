@@ -2,6 +2,7 @@ package com.xiaogch.conf.database;
 
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.Signature;
+import org.aspectj.lang.annotation.After;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.aspectj.lang.annotation.Pointcut;
@@ -22,7 +23,7 @@ public class DatasourceSelectAop {
 
     static Logger logger = LoggerFactory.getLogger(DatasourceSelectAop.class);
 
-    @Pointcut("execution(* com.xiaogch.springboot.dao..*.select*(..)) || execution(* com.xiaogch.springboot.dao..*.get*(..))")
+    @Pointcut("execution(* com.xiaogch..*.dao..*.select*(..)) || execution(* com.xiaogch..*.dao..*.get*(..))")
     public void pointCutSelect() {
 
     }
@@ -46,9 +47,9 @@ public class DatasourceSelectAop {
     }
 
 
-    @Pointcut("execution(* com.xiaogch.springboot.dao..*.insert*(..)) " +
-            "|| execution(* com.xiaogch.springboot.dao..*.update*(..)) " +
-            "|| execution(* com.xiaogch.springboot.dao..*.delete*(..))")
+    @Pointcut("execution(* com.xiaogch..*.dao..*.insert*(..)) " +
+            "|| execution(* com.xiaogch..*.dao..*.update*(..)) " +
+            "|| execution(* com.xiaogch..*.dao..*.delete*(..))")
 //            "|| execution(* com.xiaogch.springboot.mapper..*.insert*(..)) " +
 //            "|| execution(* com.xiaogch.springboot.mapper..*.update*(..)) " +
 //            "|| execution(* com.xiaogch.springboot.mapper..*.delete*(..)))")
@@ -59,5 +60,10 @@ public class DatasourceSelectAop {
     @Before(value = "pointCutUpdate()")
     public void setMasterDatasource(JoinPoint joinPoint) {
         DatasourceContextHolder.selectMaster();
+    }
+
+    @After(" pointCutUpdate() || pointCutSelect()")
+    public void clearDatasource() {
+        DatasourceContextHolder.clearDatasourceType();
     }
 }
