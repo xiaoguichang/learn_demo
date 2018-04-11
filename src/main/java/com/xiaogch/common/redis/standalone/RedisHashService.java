@@ -1,44 +1,34 @@
-package com.xiaogch.common.redis;
+package com.xiaogch.common.redis.standalone;
 
 import com.alibaba.fastjson.JSONObject;
-import redis.clients.jedis.Jedis;
+import com.xiaogch.common.redis.RedisException;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.Transaction;
 
 import java.util.List;
 import java.util.Map;
 
-public class JedisHashBaseService extends JedisBaseService {
-    private final String STATUS_CODE_OK = "OK";
+public class RedisHashService extends RedisService {
 
     private JedisPool jedisPool;
     private String key ;
 
-    public JedisHashBaseService(JedisPool jedisPool) {
+    public RedisHashService(JedisPool jedisPool) {
         this(jedisPool , "hash.default");
     }
 
-    public JedisHashBaseService(JedisPool jedisPool, String key) {
+    public RedisHashService(JedisPool jedisPool, String key) {
         super(jedisPool);
         this.jedisPool = jedisPool;
         this.key = key;
     }
-
 
     public String hget(String field) throws RedisException {
         return this.hget(key , field);
     }
 
     public String hget(String key , String field) throws RedisException {
-        Jedis jedis = null;
-        try {
-            jedis = jedisPool.getResource();
-            return jedis.hget(key , field);
-        } catch (Exception e) {
-            throw new RedisException("get string key from redis exception" , e);
-        } finally {
-            returnResource(jedis);
-        }
+        return execute(jedis -> jedis.hget(key , field));
     }
 
     public <T> T hget(String key , String field, Class<T> tClass) throws RedisException {
@@ -63,22 +53,11 @@ public class JedisHashBaseService extends JedisBaseService {
      * @throws RedisException
      */
     public Long hset(String key , String field , String value) throws RedisException {
-        Jedis jedis = null;
-        try {
-            jedis = jedisPool.getResource();
-            return jedis.hset(key , field, value);
-        } catch (Exception e) {
-            throw new RedisException("get hash key from redis exception" , e);
-        } finally {
-            returnResource(jedis);
-        }
+        return execute(jedis -> jedis.hset(key , field, value));
     }
 
-
     public boolean hsetValue(String key , String field, Object value , int second) throws RedisException {
-        Jedis jedis = null;
-        try {
-            jedis = jedisPool.getResource();
+        return execute(jedis -> {
             Transaction transaction = jedis.multi();
             String valueJson = JSONObject.toJSONString(value);
 
@@ -92,37 +71,16 @@ public class JedisHashBaseService extends JedisBaseService {
                 }
             }
             return false;
-        } catch (Exception e) {
-            throw new RedisException("set value to redis exception" , e);
-        } finally {
-            returnResource(jedis);
-        }
+        });
     }
-
 
 
     public String hmset(String key , Map<String , String> fieldAndValues) throws RedisException {
-        Jedis jedis = null;
-        try {
-            jedis = jedisPool.getResource();
-            return jedis.hmset(key , fieldAndValues);
-        } catch (Exception e) {
-            throw new RedisException("redis hmset Exception" , e);
-        } finally {
-            returnResource(jedis);
-        }
+        return execute(jedis -> jedis.hmset(key , fieldAndValues));
     }
 
     public List<String> hmget(String key , String...fields) throws RedisException {
-        Jedis jedis = null;
-        try {
-            jedis = jedisPool.getResource();
-            return jedis.hmget(key , fields);
-        } catch (Exception e) {
-            throw new RedisException("redis hmget Exception" , e);
-        } finally {
-            returnResource(jedis);
-        }
+        return execute(jedis -> jedis.hmget(key , fields));
     }
 
     public Long hincr(String field) throws RedisException {
@@ -138,15 +96,7 @@ public class JedisHashBaseService extends JedisBaseService {
     }
 
     public Long hincr(String key , String field , long increament) throws RedisException {
-        Jedis jedis = null;
-        try {
-            jedis = jedisPool.getResource();
-            return jedis.hincrBy(key , field , increament);
-        } catch (Exception e) {
-            throw new RedisException("redis hincr Exception" , e);
-        } finally {
-            returnResource(jedis);
-        }
+        return execute(jedis -> jedis.hincrBy(key , field , increament));
     }
 
     public boolean hexist(String field) throws RedisException{
@@ -154,28 +104,11 @@ public class JedisHashBaseService extends JedisBaseService {
     }
 
     public boolean hexist(String key , String field) throws RedisException{
-        Jedis jedis = null;
-        try {
-            jedis = jedisPool.getResource();
-            return jedis.hexists(key , field);
-        } catch (Exception e) {
-            throw new RedisException("redis hexist Exception" , e);
-        } finally {
-            returnResource(jedis);
-        }
+        return execute(jedis -> jedis.hexists(key , field));
     }
 
-
-    public Long hdel(String key , String field) throws RedisException{
-        Jedis jedis = null;
-        try {
-            jedis = jedisPool.getResource();
-            return jedis.hdel(key , field);
-        } catch (Exception e) {
-            throw new RedisException("redis hexist Exception" , e);
-        } finally {
-            returnResource(jedis);
-        }
+    public Long hdel(String key , String...field) throws RedisException{
+        return execute(jedis -> jedis.hdel(key , field));
     }
 
 }

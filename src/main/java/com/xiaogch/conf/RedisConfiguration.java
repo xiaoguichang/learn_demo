@@ -26,4 +26,5 @@ public class RedisConfiguration {
         JedisPool jedisPool = new JedisPool(jedisPoolConfig , "host",6379);
         return jedisPool;
     }
+
 }

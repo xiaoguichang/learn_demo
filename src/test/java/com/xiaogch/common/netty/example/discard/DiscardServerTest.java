@@ -1,5 +1,6 @@
 package com.xiaogch.common.netty.example.discard;
 
+import com.xiaogch.common.netty.example.server.DiscardServer;
 import org.junit.Test;
 
 /**
