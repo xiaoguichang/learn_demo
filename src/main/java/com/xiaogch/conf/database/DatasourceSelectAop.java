@@ -22,7 +22,8 @@ public class DatasourceSelectAop {
 
     static Logger logger = LoggerFactory.getLogger(DatasourceSelectAop.class);
 
-    @Pointcut("execution(* com.xiaogch.springboot.dao..*.select*(..)) || execution(* com.xiaogch.springboot.dao..*.get*(..))")
+    @Pointcut("execution(* com.xiaogch.springboot.dao..*.select*(..)) || " +
+            "execution(* com.xiaogch.springboot.dao..*.get*(..))")
     public void pointCutSelect() {
 
     }
