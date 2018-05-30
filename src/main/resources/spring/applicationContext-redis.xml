@@ -6,19 +6,19 @@
 
 
 	<bean id="jedisPoolConfig" class="redis.clients.jedis.JedisPoolConfig">
-	</bean>
+</bean>
 
 	<bean id="shardedJedisPool" class="redis.clients.jedis.ShardedJedisPool">
 		<constructor-arg index="0" ref="jedisPoolConfig"/>
 		<constructor-arg index="1">
 			<list>
 				<bean class="redis.clients.jedis.JedisShardInfo">
-					<constructor-arg index="0" value="${spring.shard.redis.0.host}"/>
-					<constructor-arg index="1" value="${spring.shard.redis.0.port}"/>
+					<constructor-arg index="0" value="${redis.shard.host[0]}"/>
+					<constructor-arg index="1" value="${redis.shard.port[0]}"/>
 				</bean>
 				<bean class="redis.clients.jedis.JedisShardInfo">
-					<constructor-arg index="0" value="${spring.shard.redis.1.host}"/>
-					<constructor-arg index="1" value="${spring.shard.redis.1.port}"/>
+					<constructor-arg index="0" value="${redis.shard.host[1]}"/>
+					<constructor-arg index="1" value="${redis.shard.port[1]}"/>
 				</bean>
 			</list>
 		</constructor-arg>

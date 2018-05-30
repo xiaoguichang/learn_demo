@@ -1,9 +1,10 @@
 package com.xiaogch.conf.database;
 
+import com.alibaba.druid.pool.DruidDataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.jdbc.DataSourceBuilder;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -26,7 +27,6 @@ import java.util.Map;
  */
 @Configuration
 @EnableTransactionManagement
-//public class DatasourceConfiguration extends AbstractDatasourceBuilder{
 public class DatasourceConfiguration {
     private static Logger logger = LoggerFactory.getLogger(DatasourceConfiguration.class);
 
@@ -37,7 +37,7 @@ public class DatasourceConfiguration {
     @ConfigurationProperties(prefix = "spring.datasource.slave")
     public DataSource slaveDatasource() {
         logger.info("create slaveDatasource type={}" , type);
-        return DataSourceBuilder.create().type(type).build();
+        return new DruidDataSource();
     }
 
 
@@ -45,21 +45,16 @@ public class DatasourceConfiguration {
     @ConfigurationProperties(prefix = "spring.datasource.master")
     public DataSource masterDatasource() {
         logger.info("create masterDatasource type={}" , type);
-        return DataSourceBuilder.create().type(type).build();
+        return new DruidDataSource();
     }
 
-//    public DataSource dataSource(Environment environment) {
-//        DataSource dataSource = getDataSource(environment , "spring.datasource.master");
-//        return dataSource;
-//    }
-
-
     @Bean(name = "dynamicDatasource")
-    public DynamicDataSource dynamicDataSource() {
+    @Autowired
+    public DynamicDataSource dynamicDataSource(DataSource masterDatasource , DataSource slaveDatasource) {
         DynamicDataSource dynamicDataSource = new DynamicDataSource(0);
         Map<Object , Object> targetDataSource = new HashMap<>();
-        targetDataSource.put(DatasourceType.MASTER.getType() + "_0" , masterDatasource());
-        targetDataSource.put(DatasourceType.SLAVE.getType()+ "_0" , slaveDatasource());
+        targetDataSource.put(DatasourceType.MASTER.getType() + "_0" , masterDatasource);
+        targetDataSource.put(DatasourceType.SLAVE.getType()+ "_0" , slaveDatasource);
         dynamicDataSource.setTargetDataSources(targetDataSource);
         dynamicDataSource.setDefaultTargetDataSource(masterDatasource());
         return dynamicDataSource;
@@ -71,4 +66,6 @@ public class DatasourceConfiguration {
         dataSourceTransactionManager.setDataSource(masterDatasource());
         return dataSourceTransactionManager;
     }
+
+
 }
