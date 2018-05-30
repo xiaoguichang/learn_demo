@@ -1,9 +1,11 @@
 # 服务器配置
 server:
   port: 8081
-  context-path: /demo
   application: spring-boot test
   env: dev
+  servlet:
+    context-path: /demo
+
 
 spring:
   profiles:
@@ -14,11 +16,12 @@ spring:
       sessionTimeout: 60000
       connectTimeout: 60000
       reconnectTimes: 3
+
+redis:
   shard:
-    redis:
-      1:
-        host: 127.0.0.1
-        port: 6379
-      2:
-        host: 127.0.0.1
-        port: 6380
+      host:
+        - 127.0.0.1
+        - 127.0.0.1
+      port:
+        - 6379
+        - 6379

@@ -5,7 +5,6 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.autoconfigure.transaction.TransactionAutoConfiguration;
-import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.ImportResource;
 
 @SpringBootApplication(exclude = {DataSourceAutoConfiguration.class ,
@@ -14,6 +13,18 @@ import org.springframework.context.annotation.ImportResource;
 public class Application {
 
 	public static void main(String[] args) {
+//		SpringApplication application = new SpringApplication();
+//		application.setBannerMode(Banner.Mode.OFF);
+//		application.run(args);
+//		DispatcherServlet dispatcherServlet;
+//		new SpringApplicationBuilder().sources(Application.class)
+//				.listeners(new ApplicationListener<ApplicationEvent>() {
+//					@Override
+//					public void onApplicationEvent(ApplicationEvent event) {
+//
+//					}
+//				})
+//				.run(args);
 		SpringApplication.run(Application.class, args);
 	}
 }

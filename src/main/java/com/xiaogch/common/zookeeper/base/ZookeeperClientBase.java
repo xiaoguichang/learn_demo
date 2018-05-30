@@ -1,11 +1,11 @@
 package com.xiaogch.common.zookeeper.base;
 
 import com.xiaogch.common.zookeeper.ZookeeperConfig;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.zookeeper.WatchedEvent;
 import org.apache.zookeeper.Watcher.Event.KeeperState;
 import org.apache.zookeeper.ZooKeeper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -19,7 +19,7 @@ import java.util.concurrent.CountDownLatch;
 @Component
 public class ZookeeperClientBase {
 
-    Logger logger = LoggerFactory.getLogger(ZookeeperClientBase.class);
+    static Logger logger = LogManager.getLogger(ZookeeperClientBase.class);
 
     @Autowired
     ZookeeperConfig zookeeperConfig;

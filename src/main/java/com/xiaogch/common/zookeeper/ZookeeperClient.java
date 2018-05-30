@@ -5,6 +5,7 @@ import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
 import org.apache.curator.retry.ExponentialBackoffRetry;
 import org.apache.zookeeper.CreateMode;
+import org.apache.zookeeper.data.Stat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,7 +34,7 @@ public class ZookeeperClient {
 
     @PostConstruct
     public void registerServer() throws Exception {
-
+        logger.info("registerServer() begin ....");
         RetryPolicy retryPolicy = new ExponentialBackoffRetry(1000 , 3);
         curatorFramework = CuratorFrameworkFactory.builder().
                 connectString(zookeeperConfig.getConnectStr())
@@ -43,13 +44,21 @@ public class ZookeeperClient {
                 .build();
         curatorFramework.start();
 
-        String port = environment.getProperty("server.port");
-        String result = curatorFramework.create()
-                .creatingParentsIfNeeded()
-                .withMode(CreateMode.EPHEMERAL)
-                .forPath(zookeeperConfig.getServerPath());
-
-        logger.info("result = {} " , result);
+        Stat stat = curatorFramework.checkExists().forPath(zookeeperConfig.getServerPath());
+        logger.info("stat={}" , stat);
+        if (stat == null) {
+            try {
+                logger.info("path={} node not exists , program create it !", zookeeperConfig.getServerPath());
+//                String port = environment.getProperty("server.port");
+                curatorFramework.create()
+                        .creatingParentsIfNeeded()
+                        .withMode(CreateMode.EPHEMERAL)
+                        .forPath(zookeeperConfig.getServerPath());
+                logger.info("path={} create success" , zookeeperConfig.getServerPath());
+            } catch (Exception e) {
+                logger.error("create path={} exception" , e);
+            }
+        }
     }
 
     @PreDestroy

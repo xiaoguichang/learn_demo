@@ -2,11 +2,11 @@ package com.xiaogch.conf;
 
 import com.xiaogch.conf.database.DynamicDataSource;
 import org.apache.ibatis.session.SqlSessionFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.mybatis.spring.SqlSessionFactoryBean;
 import org.mybatis.spring.SqlSessionTemplate;
 import org.mybatis.spring.annotation.MapperScan;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
@@ -29,7 +29,7 @@ import org.springframework.core.io.support.ResourcePatternResolver;
 @MapperScan(basePackages = "com.xiaogch.dao")
 public class MybatisMasterConfiguration {
 
-    private static Logger logger = LoggerFactory.getLogger(MybatisMasterConfiguration.class);
+    private static Logger logger = LogManager.getLogger(MybatisMasterConfiguration.class);
 
     @Autowired
     DynamicDataSource dynamicDataSource;
