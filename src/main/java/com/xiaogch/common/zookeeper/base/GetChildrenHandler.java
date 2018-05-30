@@ -1,12 +1,14 @@
 package com.xiaogch.common.zookeeper.base;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.zookeeper.WatchedEvent;
-import org.apache.zookeeper.Watcher.Event.EventType;
 import org.apache.zookeeper.ZooKeeper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 
@@ -19,7 +21,7 @@ public class GetChildrenHandler extends WatchedEventHandler {
 
     private List<String> children = new ArrayList<>();
 
-    Logger logger = LoggerFactory.getLogger(GetChildrenHandler.class);
+    static Logger logger = LogManager.getLogger(GetChildrenHandler.class);
 
     public GetChildrenHandler(ZooKeeper zooKeeper , String path) {
         this.zooKeeper = zooKeeper;

@@ -1,7 +1,7 @@
 package com.xiaogch.common.util;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.util.Assert;
 
 import java.io.UnsupportedEncodingException;
@@ -16,7 +16,7 @@ import java.util.regex.Pattern;
  */
 public class ByteUtil {
 
-    private static final Logger logger = LoggerFactory.getLogger(ByteUtil.class);
+    private static final Logger logger = LogManager.getLogger(ByteUtil.class);
     private static final int BYTE_LENGTH_OF_LONG = 8;
     private static final int BYTE_LENGTH_OF_INT = 4;
     private static final int BYTE_LENGTH_OF_SHORT = 2;

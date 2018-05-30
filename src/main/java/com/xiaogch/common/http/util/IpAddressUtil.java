@@ -1,7 +1,7 @@
 package com.xiaogch.common.http.util;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.util.StringUtils;
 
 import javax.servlet.http.HttpServletRequest;
@@ -10,7 +10,7 @@ import java.util.Enumeration;
 
 public class IpAddressUtil {
 
-    static Logger logger = LoggerFactory.getLogger(IpAddressUtil.class);
+    static Logger logger = LogManager.getLogger(IpAddressUtil.class);
 
     /**
      *

@@ -1,8 +1,8 @@
 package com.xiaogch.common.http.interceptor;
 
 import com.xiaogch.common.http.RequestContextHolder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -15,7 +15,7 @@ import java.util.Enumeration;
  */
 public class HttpRequestInterceptor implements HandlerInterceptor {
 
-    static Logger logger = LoggerFactory.getLogger(HttpRequestInterceptor.class);
+    static Logger logger = LogManager.getLogger(HttpRequestInterceptor.class);
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {

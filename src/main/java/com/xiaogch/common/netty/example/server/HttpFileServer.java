@@ -9,14 +9,13 @@ import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.codec.http.HttpRequestDecoder;
 import io.netty.handler.codec.http.HttpResponseEncoder;
 import io.netty.handler.stream.ChunkedWriteHandler;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import java.net.ServerSocket;
 
 public class HttpFileServer {
 
-    Logger logger = LoggerFactory.getLogger(HttpFileServer.class);
+    static Logger logger = LogManager.getLogger(HttpFileServer.class);
 
     private static final String DEFAULT_URL = "/";
 
