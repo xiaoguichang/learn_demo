@@ -1,18 +1,21 @@
 package com.xiaogch.gateway.codec;
 
+import com.xiaogch.gateway.http.HttpSession;
+import com.xiaogch.gateway.http.MyHttpRequest;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToMessageDecoder;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpMethod;
+import io.netty.handler.codec.http.HttpRequest;
 import io.netty.handler.codec.http.QueryStringDecoder;
+import io.netty.handler.codec.http.cookie.Cookie;
+import io.netty.handler.codec.http.cookie.ServerCookieDecoder;
 import io.netty.handler.codec.http.multipart.Attribute;
 import io.netty.handler.codec.http.multipart.HttpPostRequestDecoder;
 import io.netty.handler.codec.http.multipart.InterfaceHttpData;
+import org.springframework.util.StringUtils;
 
-import javax.servlet.http.HttpServletRequest;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * ProjectName: demo<BR>
@@ -24,7 +27,7 @@ import java.util.Map;
  * Description: <BR>
  * Function List:  <BR>
  */
-public class HttpServeletRequestDecoder extends MessageToMessageDecoder<FullHttpRequest>{
+public class MyHttpRequestDecoder extends MessageToMessageDecoder<FullHttpRequest>{
 
     /**
      * Decode from one message to an other. This method will be called for each written message that can be handled
@@ -38,11 +41,48 @@ public class HttpServeletRequestDecoder extends MessageToMessageDecoder<FullHttp
      */
     @Override
     protected void decode(ChannelHandlerContext ctx, FullHttpRequest msg, List<Object> out) throws Exception {
-        HttpServletRequest a;
+
+        Map<String , String> parameterMap = paramterParase(msg);
+        // cookie ...
+        Map<String , Cookie> cookieMap = parseCookie(msg);
+        // httpSession ...
+        HttpSession httpSession = parseSession(cookieMap);
+        MyHttpRequest myHttpRequest = new MyHttpRequest(msg, parameterMap , cookieMap , httpSession);
+        out.add(myHttpRequest);
+
+    }
+
+    private HttpSession parseSession(Map<String, Cookie> cookieMap) {
+        //Cookie:JSESSIONID=E094E950654C8C3564C6306EB8D70F37
+       Cookie cookie = cookieMap.get("JSESSIONID");
+       if (cookie == null) {
+           String sessionId = UUID.randomUUID().toString();
+           return new HttpSession(sessionId);
+       } else {
+           HttpSession session = new HttpSession();
+           session.setSessionId(cookie.value());
+           return session;
+       }
+
+    }
+
+    public Map<String , Cookie> parseCookie(HttpRequest httpRequest) {
+
+        Map<String , Cookie> cookieMap = new HashMap<>();
+        String headCookie = httpRequest.headers().get("Cookie");
+        if (StringUtils.hasText(headCookie)) {
+            Set<Cookie> cookies = ServerCookieDecoder.STRICT.decode(headCookie);
+            Iterator<Cookie> iterator = cookies.iterator();
+            while (iterator.hasNext()) {
+                Cookie cookie = iterator.next();
+                cookieMap.put(cookie.name() , cookie);
+            }
+        }
+        return cookieMap;
     }
 
 
-    public void paramterParase(FullHttpRequest msg){
+    public Map<String,String> paramterParase(FullHttpRequest msg){
         HttpMethod httpMethod = msg.method();
         Map<String , String> parameterMap = new LinkedHashMap<>();
 
@@ -75,6 +115,6 @@ public class HttpServeletRequestDecoder extends MessageToMessageDecoder<FullHttp
                 }
             });
         }
-
+        return parameterMap;
     }
 }

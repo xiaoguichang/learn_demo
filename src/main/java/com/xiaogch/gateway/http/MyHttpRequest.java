@@ -2,24 +2,28 @@ package com.xiaogch.gateway.http;
 
 import io.netty.handler.codec.DecoderResult;
 import io.netty.handler.codec.http.*;
-import io.netty.handler.codec.http.cookie.*;
 import io.netty.handler.codec.http.cookie.Cookie;
 
-import javax.servlet.http.HttpServletRequest;
-import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class MyHttpRequest implements HttpRequest {
 
     HttpRequest httpRequest;
 
-    Map<String , String> parameterMap = new LinkedHashMap<>();
+    Map<String , String> parameterMap = new ConcurrentHashMap<>();
 
-    Cookie[] cookies;
+    Map<String, Cookie> cookieMap = new ConcurrentHashMap<>();
 
-    public MyHttpRequest(HttpRequest httpRequest) {
+    HttpSession httpSession;
+
+    public MyHttpRequest(HttpRequest httpRequest, Map<String, String> parameterMap, Map<String, Cookie> cookieMap, HttpSession httpSession){
         this.httpRequest = httpRequest;
+        this.parameterMap.putAll(parameterMap);
+        this.cookieMap.putAll(cookieMap);
+        this.httpSession = httpSession;
     }
+
 
     /**
      * @deprecated Use {@link #method()} instead.
@@ -133,11 +137,6 @@ public class MyHttpRequest implements HttpRequest {
         httpRequest.setDecoderResult(result);
     }
 
-    public static void main(String[] args) {
-        HttpServletRequest httpServletRequest;
-
-    }
-
     /**
      * 获取参数值
      * @param name
@@ -152,12 +151,15 @@ public class MyHttpRequest implements HttpRequest {
     }
 
 
-    public Cookie[] getCookies() {
-        if (cookies == null) {
-            return new Cookie[0];
-        }
-        return cookies;
+    public Cookie getCookie(String name) {
+        return cookieMap.get(name);
     }
+
+    public HttpSession getSession() {
+        return httpSession;
+    }
+
+
 
 
 }

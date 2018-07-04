@@ -1,5 +1,6 @@
 package com.xiaogch.gateway;
 
+import com.xiaogch.gateway.codec.MyHttpRequestDecoder;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
@@ -49,9 +50,9 @@ public class GatewayServer {
                     protected void initChannel(NioSocketChannel nioSocketChannel) throws Exception {
                         nioSocketChannel.pipeline()
                                 .addLast("sys_httpRequestDecoder" , new HttpRequestDecoder())
+                                .addLast("sys_httpObjectAggregator" ,new HttpObjectAggregator(maxLength * 1024))
+                                .addLast("app_MyHttpRequestDecoder" , new MyHttpRequestDecoder())
                                 .addLast("sys_httpResponseEncoder" , new HttpRequestEncoder())
-                                .addLast("sys_httpObjectAggregator" ,
-                                        new HttpObjectAggregator(maxLength * 1024))
                                 .addLast("app_httpServerInboundHandler" , new HttpServerInboundHandler());
                     }
                 });

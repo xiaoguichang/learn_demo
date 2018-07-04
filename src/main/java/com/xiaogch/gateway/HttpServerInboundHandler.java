@@ -176,22 +176,4 @@ public class HttpServerInboundHandler extends ChannelInboundHandlerAdapter  {
         super.exceptionCaught(ctx, cause);
     }
 
-    public void setSessionId(HttpRequest httpRequest) {
-//        Cookie:JSESSIONID=E094E950654C8C3564C6306EB8D70F37
-
-        String headCookie = httpRequest.headers().get("Cookie");
-        if (StringUtils.hasText(headCookie)) {
-            Set<Cookie> cookies = ServerCookieDecoder.STRICT.decode(headCookie);
-            Iterator<Cookie> iterator = cookies.iterator();
-            while (iterator.hasNext()) {
-                Cookie cookie = iterator.next();
-                //SessionId
-                if ("JSESSIONID".equals(cookie.name())) {
-
-                }
-
-            }
-        }
-    }
-
 }
