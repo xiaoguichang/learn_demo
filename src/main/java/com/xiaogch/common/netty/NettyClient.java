@@ -1,10 +1,14 @@
 package com.xiaogch.common.netty;
 
-import io.netty.buffer.ByteBuf;
+import org.springframework.web.context.ContextLoaderListener;
 
 import java.io.Serializable;
-import java.nio.ByteBuffer;
 
 public class NettyClient implements Serializable {
+
+
+    ContextLoaderListener contextLoaderListener;
+    org.springframework.web.context.support.XmlWebApplicationContext applicationContext;
+
 
 }

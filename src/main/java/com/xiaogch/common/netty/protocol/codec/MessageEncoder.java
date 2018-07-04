@@ -37,7 +37,7 @@ public final class MessageEncoder extends MessageToByteEncoder<Message> {
 
     /**
      * Encode a message into a {@link ByteBuf}. This method will be called for each written message that can be handled
-     * by this encoder.
+     * by this codec.
      *
      * @param ctx the {@link ChannelHandlerContext} which this {@link MessageToByteEncoder} belongs to
      * @param msg the message to encode
