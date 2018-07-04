@@ -51,7 +51,7 @@ public class ProtocolClient {
                         protected void initChannel(SocketChannel ch) throws Exception {
                             ChannelPipeline pipeline = ch.pipeline();
                             pipeline.addLast("message decoder" , new MessageDecoder(1024 * 1024 , 4, 4))
-                                    .addLast("message encoder" , new MessageEncoder())
+                                    .addLast("message codec" , new MessageEncoder())
                                     .addLast("login request handler" , new LoginReqHandler())
                                     .addLast("heart beat request handler" , new HeartBeatReqHandler())
                                     .addLast("read timeout handler" , new ReadTimeoutHandler(60));

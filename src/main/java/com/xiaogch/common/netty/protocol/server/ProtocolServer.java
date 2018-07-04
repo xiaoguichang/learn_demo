@@ -50,7 +50,7 @@ public class ProtocolServer {
                     protected void initChannel(SocketChannel ch) throws Exception {
                         ChannelPipeline channelPipeline = ch.pipeline();
                         channelPipeline.addLast("message decoder" , new MessageDecoder(1024*1024 , 4 , 4))
-                                .addLast("message encoder" , new MessageEncoder())
+                                .addLast("message codec" , new MessageEncoder())
                                 .addLast("login auth response handler" , new LoginAuthRespHandler())
                                 .addLast("heart beat response handler" , new HeartBeatResHandler())
                                 .addLast("read timeout hanlder" , new ReadTimeoutHandler(50));

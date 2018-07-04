@@ -25,6 +25,7 @@ public class DiscardServerHandler extends ChannelInboundHandlerAdapter {
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
 
         try {
+
             // todo Do something with msg
             ByteBuf byteBuf = (ByteBuf) msg;
             byte[] bytes = new byte[byteBuf.readableBytes()];

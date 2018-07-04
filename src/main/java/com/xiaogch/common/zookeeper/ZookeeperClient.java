@@ -19,7 +19,7 @@ import javax.annotation.PreDestroy;
  * Created by Administrator on 2018/2/8 0008.
  */
 
-@Component
+//@Component
 public class ZookeeperClient {
 
     static  Logger logger = LoggerFactory.getLogger(ZookeeperClient.class);
