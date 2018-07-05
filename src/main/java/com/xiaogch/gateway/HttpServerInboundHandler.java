@@ -1,16 +1,12 @@
 package com.xiaogch.gateway;
 
 import com.alibaba.fastjson.JSONObject;
+import com.xiaogch.gateway.filter.GatewayRunner;
+import io.netty.buffer.Unpooled;
 import io.netty.channel.*;
 import io.netty.handler.codec.http.*;
-import io.netty.handler.codec.http.cookie.*;
-import io.netty.handler.codec.http.cookie.Cookie;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.util.StringUtils;
-
-import java.util.Iterator;
-import java.util.Set;
 
 /**
  * ProjectName: demo<BR>
@@ -23,6 +19,8 @@ import java.util.Set;
  * Function List:  <BR>
  */
 public class HttpServerInboundHandler extends ChannelInboundHandlerAdapter  {
+
+    private GatewayRunner runner = new GatewayRunner();
 
     static Logger logger = LoggerFactory.getLogger(HttpServerInboundHandler.class);
 
@@ -106,11 +104,7 @@ public class HttpServerInboundHandler extends ChannelInboundHandlerAdapter  {
 
         }
         System.out.println(msg.getClass());
-
-//        HttpObjectAggregator.AggregatedFullHttpRequest request;
-
-        System.out.println(JSONObject.toJSONString(msg));
-        super.channelRead(ctx, msg);
+        runner.run();
     }
 
     /**
@@ -125,8 +119,10 @@ public class HttpServerInboundHandler extends ChannelInboundHandlerAdapter  {
     public void channelReadComplete(ChannelHandlerContext ctx) throws Exception {
         System.out.println("httpServerInboundHandler channelReadComplete ...");
         FullHttpResponse fullHttpResponse = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1 , HttpResponseStatus.OK);
-        fullHttpResponse.content().writeBytes("ok has got the msg".getBytes());
-        ctx.writeAndFlush(fullHttpResponse).addListener(ChannelFutureListener.CLOSE);
+        fullHttpResponse.content().writeBytes(Unpooled.wrappedBuffer("ok has got the msg".getBytes()));
+        fullHttpResponse.headers().set(HttpHeaderNames.CONTENT_TYPE, "text/html;charset=UTF-8");
+        fullHttpResponse.headers().setInt(HttpHeaderNames.CONTENT_LENGTH, fullHttpResponse.content().readableBytes());
+        ctx.writeAndFlush(fullHttpResponse);
     }
 
     /**

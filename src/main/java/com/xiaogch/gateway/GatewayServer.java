@@ -12,6 +12,7 @@ import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.codec.http.HttpRequestDecoder;
 import io.netty.handler.codec.http.HttpRequestEncoder;
+import io.netty.handler.codec.http.HttpResponseEncoder;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 import org.slf4j.Logger;
@@ -52,7 +53,7 @@ public class GatewayServer {
                                 .addLast("sys_httpRequestDecoder" , new HttpRequestDecoder())
                                 .addLast("sys_httpObjectAggregator" ,new HttpObjectAggregator(maxLength * 1024))
                                 .addLast("app_MyHttpRequestDecoder" , new MyHttpRequestDecoder())
-                                .addLast("sys_httpResponseEncoder" , new HttpRequestEncoder())
+                                .addLast("sys_httpResponseEncoder" , new HttpResponseEncoder())
                                 .addLast("app_httpServerInboundHandler" , new HttpServerInboundHandler());
                     }
                 });
