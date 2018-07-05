@@ -128,7 +128,7 @@ public class ShardStringService extends ShardService {
     public <T> T getValue(String key , Class<T> tClass) {
         String value = get(key);
         if (value != null) {
-            logger.info("key={} , value={}" , key , value);
+            LOGGER.info("key={} , value={}" , key , value);
             return JSONObject.parseObject(value , tClass);
         }
         return null;

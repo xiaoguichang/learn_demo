@@ -31,3 +31,8 @@ redis:
         - 6379
         - 6379
 
+es:
+  connect:
+    str: 127.0.0.1:9300
+  cluster:
+    name: elasticsearch

@@ -29,7 +29,7 @@ public class ShardRedisHashService extends ShardService {
 
     public <T> T hget(String key , String field, Class<T> tClass) throws RedisException {
         String value = hget(key , field);
-        logger.info("key={} filed={} value in redis is {}" , key , field , value);
+        LOGGER.info("key={} filed={} value in redis is {}" , key , field , value);
         if (value != null) {
             return JSONObject.parseObject(value , tClass);
         }

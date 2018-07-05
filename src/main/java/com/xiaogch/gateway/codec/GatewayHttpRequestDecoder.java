@@ -1,7 +1,7 @@
 package com.xiaogch.gateway.codec;
 
-import com.xiaogch.gateway.http.HttpSession;
-import com.xiaogch.gateway.http.MyHttpRequest;
+import com.xiaogch.gateway.http.GatewayHttpRequest;
+import com.xiaogch.gateway.http.GatewayHttpSession;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToMessageDecoder;
 import io.netty.handler.codec.http.FullHttpRequest;
@@ -13,8 +13,12 @@ import io.netty.handler.codec.http.cookie.ServerCookieDecoder;
 import io.netty.handler.codec.http.multipart.Attribute;
 import io.netty.handler.codec.http.multipart.HttpPostRequestDecoder;
 import io.netty.handler.codec.http.multipart.InterfaceHttpData;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.util.StringUtils;
 
+import java.net.InetSocketAddress;
+import java.net.SocketAddress;
 import java.util.*;
 
 /**
@@ -27,8 +31,9 @@ import java.util.*;
  * Description: <BR>
  * Function List:  <BR>
  */
-public class MyHttpRequestDecoder extends MessageToMessageDecoder<FullHttpRequest>{
+public class GatewayHttpRequestDecoder extends MessageToMessageDecoder<FullHttpRequest>{
 
+    static Logger LOGGER = LogManager.getLogger(GatewayHttpRequestDecoder.class);
     /**
      * Decode from one message to an other. This method will be called for each written message that can be handled
      * by this encoder.
@@ -46,20 +51,23 @@ public class MyHttpRequestDecoder extends MessageToMessageDecoder<FullHttpReques
         // cookie ...
         Map<String , Cookie> cookieMap = parseCookie(msg);
         // httpSession ...
-        HttpSession httpSession = parseSession(cookieMap);
-        MyHttpRequest myHttpRequest = new MyHttpRequest(msg, parameterMap , cookieMap , httpSession);
-        out.add(myHttpRequest);
+        GatewayHttpSession httpSession = parseSession(cookieMap);
+        InetSocketAddress address = (InetSocketAddress) ctx.channel().remoteAddress();
 
+        LOGGER.info("remoteAddress : {}", address);
+        GatewayHttpRequest gatewayHttpRequest = new GatewayHttpRequest(msg, parameterMap ,
+                cookieMap , httpSession , address.getHostName());
+        out.add(gatewayHttpRequest);
     }
 
-    private HttpSession parseSession(Map<String, Cookie> cookieMap) {
+    private GatewayHttpSession parseSession(Map<String, Cookie> cookieMap) {
         //Cookie:JSESSIONID=E094E950654C8C3564C6306EB8D70F37
        Cookie cookie = cookieMap.get("JSESSIONID");
        if (cookie == null) {
            String sessionId = UUID.randomUUID().toString();
-           return new HttpSession(sessionId);
+           return new GatewayHttpSession(sessionId);
        } else {
-           HttpSession session = new HttpSession();
+           GatewayHttpSession session = new GatewayHttpSession();
            session.setSessionId(cookie.value());
            return session;
        }

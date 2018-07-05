@@ -1,8 +1,8 @@
 package com.xiaogch.common.redis.standalone;
 
 import com.xiaogch.common.redis.RedisException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 
@@ -22,7 +22,7 @@ public class RedisService {
 
     public final String STATUS_CODE_OK = "OK";
 
-    Logger logger = LoggerFactory.getLogger(getClass());
+    static Logger LOGGER = LogManager.getLogger(RedisService.class);
 
     private JedisPool jedisPool;
 
@@ -62,7 +62,7 @@ public class RedisService {
                 jedis.close();
             }
         } catch (Exception e) {
-            logger.error("return jedis connection to connectPool exception" , e);
+            LOGGER.error("return jedis connection to connectPool exception" , e);
         }
     }
 

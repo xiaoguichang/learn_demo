@@ -1,8 +1,8 @@
 package com.xiaogch.conf.database;
 
 import com.alibaba.druid.pool.DruidDataSource;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -28,7 +28,7 @@ import java.util.Map;
 @Configuration
 @EnableTransactionManagement
 public class DatasourceConfiguration {
-    private static Logger logger = LoggerFactory.getLogger(DatasourceConfiguration.class);
+    private static Logger LOGGER = LogManager.getLogger(DatasourceConfiguration.class);
 
     @Value("${spring.datasource.type}")
     Class<? extends DataSource> type;
@@ -36,7 +36,7 @@ public class DatasourceConfiguration {
     @Bean(name = "slaveDatasource")
     @ConfigurationProperties(prefix = "spring.datasource.slave")
     public DataSource slaveDatasource() {
-        logger.info("create slaveDatasource type={}" , type);
+        LOGGER.info("create slaveDatasource type={}" , type);
         return new DruidDataSource();
     }
 
@@ -44,7 +44,7 @@ public class DatasourceConfiguration {
     @Bean(name = "masterDatasource")
     @ConfigurationProperties(prefix = "spring.datasource.master")
     public DataSource masterDatasource() {
-        logger.info("create masterDatasource type={}" , type);
+        LOGGER.info("create masterDatasource type={}" , type);
         return new DruidDataSource();
     }
 

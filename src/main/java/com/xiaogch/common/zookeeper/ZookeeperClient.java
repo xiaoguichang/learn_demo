@@ -4,13 +4,12 @@ import org.apache.curator.RetryPolicy;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
 import org.apache.curator.retry.ExponentialBackoffRetry;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.data.Stat;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
-import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -22,7 +21,7 @@ import javax.annotation.PreDestroy;
 //@Component
 public class ZookeeperClient {
 
-    static  Logger logger = LoggerFactory.getLogger(ZookeeperClient.class);
+    static Logger LOGGER = LogManager.getLogger(ZookeeperClient.class);
     @Autowired
     ZookeeperConfig zookeeperConfig;
 
@@ -34,7 +33,7 @@ public class ZookeeperClient {
 
     @PostConstruct
     public void registerServer() throws Exception {
-        logger.info("registerServer() begin ....");
+        LOGGER.info("registerServer() begin ....");
         RetryPolicy retryPolicy = new ExponentialBackoffRetry(1000 , 3);
         curatorFramework = CuratorFrameworkFactory.builder().
                 connectString(zookeeperConfig.getConnectStr())
@@ -45,18 +44,18 @@ public class ZookeeperClient {
         curatorFramework.start();
 
         Stat stat = curatorFramework.checkExists().forPath(zookeeperConfig.getServerPath());
-        logger.info("stat={}" , stat);
+        LOGGER.info("stat={}" , stat);
         if (stat == null) {
             try {
-                logger.info("path={} node not exists , program create it !", zookeeperConfig.getServerPath());
+                LOGGER.info("path={} node not exists , program create it !", zookeeperConfig.getServerPath());
 //                String port = environment.getProperty("server.port");
                 curatorFramework.create()
                         .creatingParentsIfNeeded()
                         .withMode(CreateMode.EPHEMERAL)
                         .forPath(zookeeperConfig.getServerPath());
-                logger.info("path={} create success" , zookeeperConfig.getServerPath());
+                LOGGER.info("path={} create success" , zookeeperConfig.getServerPath());
             } catch (Exception e) {
-                logger.error("create path={} exception" , e);
+                LOGGER.error("create path={} exception" , e);
             }
         }
     }
@@ -75,7 +74,7 @@ public class ZookeeperClient {
 //            socket.connect(socketAddress , 1000);
 //            return socket.getLocalAddress().getHostAddress();
 //        } catch (Exception e) {
-//            logger.error(e.getMessage() , e);
+//            LOGGER.error(e.getMessage() , e);
 //        }
 //
 //        try {
@@ -86,7 +85,7 @@ public class ZookeeperClient {
 //                    List<InterfaceAddress> interfaceAddressList = networkInterface.getInterfaceAddresses();
 //                    int index = 0;
 //                    for (InterfaceAddress interfaceAddress : interfaceAddressList) {
-//                        logger.info("interfaceAddressList[{}] address {}" , index , interfaceAddress.getAddress().getHostAddress());
+//                        LOGGER.info("interfaceAddressList[{}] address {}" , index , interfaceAddress.getAddress().getHostAddress());
 //                    }
 //                    if (!networkInterface.isVirtual()) {
 //                        break;
@@ -98,7 +97,7 @@ public class ZookeeperClient {
 //                }
 //            }
 //        } catch (Exception e) {
-//            logger.error(e.getMessage() , e);
+//            LOGGER.error(e.getMessage() , e);
 //        }
 //
 //

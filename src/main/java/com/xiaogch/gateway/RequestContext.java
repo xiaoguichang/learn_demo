@@ -1,5 +1,7 @@
 package com.xiaogch.gateway;
 
+import com.xiaogch.gateway.http.GatewayHttpRequest;
+
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -34,5 +36,13 @@ public class RequestContext extends ConcurrentHashMap<String , Object> {
      */
     public static RequestContext concurrentRequestContext(){
         return threadLocal.get();
+    }
+
+    public GatewayHttpRequest getGatewayHttpRequest() {
+        return (GatewayHttpRequest) this.get("httpRequest");
+    }
+
+    public void setGatewayHttpRequest(GatewayHttpRequest httpRequest){
+        this.put("httpRequest" , httpRequest);
     }
 }

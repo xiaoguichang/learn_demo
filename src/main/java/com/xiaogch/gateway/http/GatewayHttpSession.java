@@ -7,7 +7,7 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * Created by Administrator on 2018/7/4 0004.
  */
-public class HttpSession {
+public class GatewayHttpSession {
 
     private long createTime;
     private String sessionId;
@@ -16,11 +16,11 @@ public class HttpSession {
     private int maxInactiveInterval = 3600;
 
 
-    public HttpSession(){
+    public GatewayHttpSession(){
 
     }
 
-    public HttpSession(String sessionId) {
+    public GatewayHttpSession(String sessionId) {
         this.sessionId = sessionId;
         this.createTime = System.currentTimeMillis();
     }

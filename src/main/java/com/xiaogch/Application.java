@@ -13,7 +13,6 @@ import org.springframework.context.annotation.ImportResource;
 public class Application {
 
 	public static void main(String[] args) {
-		org.springframework.boot.actuate.endpoint.web.servlet.AbstractWebMvcEndpointHandlerMapping a;
 //		SpringApplication application = new SpringApplication();
 //		application.setBannerMode(Banner.Mode.OFF);
 //		application.run(args);

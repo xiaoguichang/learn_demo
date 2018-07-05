@@ -1,24 +1,25 @@
 package com.xiaogch.conf.database;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * Created by Administrator on 2018/2/1 0001.
  */
 public class DatasourceContextHolder {
 
-    private static Logger logger = LoggerFactory.getLogger(DatasourceContextHolder.class);
+    private static Logger LOGGER = LogManager.getLogger(DatasourceContextHolder.class);
 
     private static ThreadLocal<DatasourceType> threadLocal = new ThreadLocal<>();
 
     public static void selectMaster() {
-        logger.debug("select master");
+        LOGGER.debug("select master");
         threadLocal.set(DatasourceType.MASTER);
     }
 
     public static void selectSlave() {
-        logger.debug("select slave");
+        LOGGER.debug("select slave");
         threadLocal.set(DatasourceType.SLAVE);
     }
 

@@ -18,7 +18,6 @@ import org.springframework.stereotype.Component;
 @Component
 public class EsAddIndex {
 
-
     @Autowired
     private EsTransportClient esTransportClient;
 

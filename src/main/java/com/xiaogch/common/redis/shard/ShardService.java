@@ -1,8 +1,8 @@
 package com.xiaogch.common.redis.shard;
 
 import com.xiaogch.common.redis.RedisException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import redis.clients.jedis.ShardedJedis;
 import redis.clients.jedis.ShardedJedisPool;
 
@@ -21,7 +21,7 @@ import java.util.function.Function;
  */
 public class ShardService {
     public final String STATUS_CODE_OK = "OK";
-    Logger logger = LoggerFactory.getLogger(ShardService.class);
+    static Logger LOGGER = LogManager.getLogger(ShardService.class);
 
     private ShardedJedisPool shardedJedisPool;
 
@@ -55,7 +55,7 @@ public class ShardService {
                 shardedJedis.close();
             }
         } catch (Exception e) {
-            logger.error("return jedis connection to connectPool exception" , e);
+            LOGGER.error("return jedis connection to connectPool exception" , e);
         }
     }
 

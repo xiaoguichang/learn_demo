@@ -7,7 +7,7 @@ import io.netty.handler.codec.http.cookie.Cookie;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class MyHttpRequest implements HttpRequest {
+public class GatewayHttpRequest implements HttpRequest {
 
     HttpRequest httpRequest;
 
@@ -15,13 +15,18 @@ public class MyHttpRequest implements HttpRequest {
 
     Map<String, Cookie> cookieMap = new ConcurrentHashMap<>();
 
-    HttpSession httpSession;
+    GatewayHttpSession httpSession;
 
-    public MyHttpRequest(HttpRequest httpRequest, Map<String, String> parameterMap, Map<String, Cookie> cookieMap, HttpSession httpSession){
+    private String remoteAddr;
+
+    public GatewayHttpRequest(HttpRequest httpRequest, Map<String, String> parameterMap,
+                              Map<String, Cookie> cookieMap, GatewayHttpSession httpSession,
+                              String remoteAddr){
         this.httpRequest = httpRequest;
         this.parameterMap.putAll(parameterMap);
         this.cookieMap.putAll(cookieMap);
         this.httpSession = httpSession;
+        this.remoteAddr = remoteAddr;
     }
 
 
@@ -110,6 +115,10 @@ public class MyHttpRequest implements HttpRequest {
         return httpRequest.headers();
     }
 
+    public String getHeader(String name) {
+        return headers().get(name);
+    }
+
     /**
      * @deprecated Use {@link #decoderResult()} instead.
      */
@@ -155,8 +164,11 @@ public class MyHttpRequest implements HttpRequest {
         return cookieMap.get(name);
     }
 
-    public HttpSession getSession() {
+    public GatewayHttpSession getSession() {
         return httpSession;
     }
 
+    public String getRemoteAddr() {
+        return remoteAddr;
+    }
 }

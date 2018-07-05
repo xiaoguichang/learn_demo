@@ -68,9 +68,9 @@ public class GatewayRunner {
 
     private void runFilterByType(GatewayFilter.FilterType filterType) {
         List<GatewayFilter> filters = GatewayFilterManager.getInstance().getFiltersByType(filterType);
-        int index = 0;
+        final int[] index = {0};
         filters.forEach(filter -> {
-            LOGGER.info("{} filter[{}] filterClass={}" , filterType , index , filter.getClass());
+            LOGGER.info("{} filter[{}] filterClass={}" , filterType , index[0]++ , filter.getClass());
             filter.doFilter();
         });
     }
