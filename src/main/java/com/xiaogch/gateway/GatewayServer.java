@@ -1,6 +1,9 @@
 package com.xiaogch.gateway;
 
 import com.xiaogch.gateway.codec.MyHttpRequestDecoder;
+import com.xiaogch.gateway.filter.GatewayFilterManager;
+import com.xiaogch.gateway.filter.MyPreFilter1;
+import com.xiaogch.gateway.filter.MyPreFilter2;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
@@ -42,6 +45,8 @@ public class GatewayServer {
         NioEventLoopGroup boss = new NioEventLoopGroup();
         NioEventLoopGroup worker = new NioEventLoopGroup();
 
+        initFilter();
+
         bootstrap.group(boss , worker)
                 .channel(NioServerSocketChannel.class)
                 .option(ChannelOption.SO_BACKLOG , 512)
@@ -70,6 +75,12 @@ public class GatewayServer {
 
     }
 
+
+    private void initFilter(){
+        GatewayFilterManager manager = GatewayFilterManager.getInstance();
+        manager.regist(null , new MyPreFilter1());
+        manager.regist(null , new MyPreFilter2());
+    }
 
     public static void main(String[] args) {
         GatewayServer server = new GatewayServer();
