@@ -3,6 +3,9 @@ package com.xiaogch.gateway.filter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.nio.file.FileSystem;
+import java.nio.file.FileSystems;
+
 /**
  * ProjectName: demo<BR>
  * File name: CommonUtil.java <BR>
@@ -23,6 +26,7 @@ public class MyPreFilter2 implements GatewayFilter {
     @Override
     public Object doFilter() {
         LOGGER.info("MyPreFilter2 doFilter running ....");
+
         return null;
     }
 

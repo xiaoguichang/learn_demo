@@ -1,5 +1,7 @@
 package com.xiaogch.es;
 
+import com.xiaogch.es.enums.IndexEnum;
+import com.xiaogch.es.enums.TypeEnum;
 import org.elasticsearch.client.transport.TransportClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -21,9 +23,9 @@ public class EsAddIndex {
     @Autowired
     private EsTransportClient esTransportClient;
 
-    public void addIndex() {
+    public void addIndex(IndexEnum indexEnum , TypeEnum typeEnum) {
         TransportClient transportClient = esTransportClient.getTransportClient();
+        transportClient.prepareIndex(typeEnum.value , typeEnum.value);
 
-        transportClient.prepareIndex().setSource();
     }
 }

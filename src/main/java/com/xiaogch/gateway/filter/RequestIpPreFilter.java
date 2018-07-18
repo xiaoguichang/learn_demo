@@ -5,8 +5,6 @@ import com.xiaogch.gateway.http.GatewayHttpRequest;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import javax.servlet.http.HttpServletRequest;
-
 /**
  * ProjectName: demo<BR>
  * File name: CommonUtil.java <BR>
@@ -49,9 +47,7 @@ public class RequestIpPreFilter implements GatewayFilter {
      * @param request
      * @return
      */
-    public  String getIpAddr(GatewayHttpRequest request){
-
-        HttpServletRequest requestq;
+    public String getIpAddr(GatewayHttpRequest request){
         String ip = request.getHeader("X-Forwarded-For");
         if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
             ip = request.getHeader("Proxy-Client-IP");
