@@ -1,12 +1,13 @@
 package com.xiaogch.zk;
 
+import com.alibaba.fastjson.JSONObject;
 import com.google.common.net.HostAndPort;
 import org.apache.curator.RetryPolicy;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
 import org.apache.curator.framework.state.ConnectionState;
-import org.apache.curator.framework.state.ConnectionStateListener;
 import org.apache.curator.retry.RetryForever;
+import org.apache.http.conn.util.InetAddressUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.zookeeper.CreateMode;
@@ -16,7 +17,8 @@ import org.apache.zookeeper.data.Stat;
 
 import java.util.Date;
 import java.util.Objects;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * ProjectName: demo<BR>
@@ -35,10 +37,13 @@ public class ZkServiceRegister {
     private String connectUrl = "127.0.0.1:2181";
     private String basePath;
     private CuratorFramework framework;
+    private ServiceInfo serviceInfo;
 
+    private ExecutorService executorService = Executors.newFixedThreadPool(1);
 
-    public ZkServiceRegister(String basePath) {
-        this.basePath = basePath;
+    public ZkServiceRegister(String basePath , ServiceInfo serviceInfo) {
+        this.basePath = basePath + "/" + serviceInfo.getServiceName();
+        this.serviceInfo = serviceInfo;
         RetryPolicy retryPolicy = new RetryForever(1000);
         framework = CuratorFrameworkFactory.builder()
                 .connectString(connectUrl)
@@ -46,121 +51,166 @@ public class ZkServiceRegister {
                 .sessionTimeoutMs(30*1000)
                 .retryPolicy(retryPolicy)
                 .build();
-        LOGGER.info("start framework begin ......");
+        LOGGER.info("############# start zookeeper client connectUrl={} begin." , connectUrl);
         framework.start();
-        LOGGER.info("start framework end ......");
+        LOGGER.info("############# start zookeeper client connectUrl={} end.", connectUrl);
     }
 
 
-    private boolean registerService(ServiceInfo serviceInfo){
-        try {
-            String path = basePath + "/" + serviceInfo.getServiceName();
-            // 判断basePath 是否已经存在
-            Stat stat = framework.checkExists().forPath(path);
-            LOGGER.info("############# registerService checkExists basePath={} , stat={}" , path , stat);
-            boolean parentExist = false;
-            if (stat == null) {
+    /**
+     * 注册服务，如果失败会一直尝试注册，直到注册成功为止
+     * @param retryInterval 重试时间间隔
+     */
+    public void registerServiceWithRetryForever(int retryInterval) {
+        executorService.submit(()->{
+            while (!createBasePath()) {
+                LOGGER.info("############# registerServiceWithRetryForever createBasePath failure");
                 try {
-                    String value = framework.create()
-                            .creatingParentsIfNeeded()
-                            .withMode(CreateMode.PERSISTENT)
-                            .withACL(ZooDefs.Ids.OPEN_ACL_UNSAFE).forPath(path);
-                    LOGGER.info("############# registerService create path={} success" , path);
-                    parentExist = true;
-                } catch (Exception e) {
-                    LOGGER.error("############# registerService create path=" + path + " exception , " + e.getMessage(), e);
-                    if (e instanceof KeeperException.NodeExistsException) {
-                        parentExist = true;
-                    }
-                }
-            } else {
-                parentExist = true;
-            }
-
-
-            try {
-                path = path + "/" + serviceInfo.getHostAndPort().getHost() + "_"
-                        + serviceInfo.getHostAndPort().getPort() + "_" + serviceInfo.getPid();
-                String value = framework.create()
-                        .creatingParentsIfNeeded()
-                        .withMode(CreateMode.EPHEMERAL)
-                        .withACL(ZooDefs.Ids.OPEN_ACL_UNSAFE).forPath(path);
-                LOGGER.info("############# registerService create path={} success" , basePath);
-                parentExist = true;
-            } catch (Exception e) {
-                LOGGER.error("############# registerService create path=" + basePath + " exception , " + e.getMessage(), e);
-                if (e instanceof KeeperException.NodeExistsException) {
-                    parentExist = true;
+                    Thread.sleep(retryInterval);
+                } catch (InterruptedException e) {
+                    LOGGER.error(e.getMessage() , e);
                 }
             }
+            LOGGER.info("############# registerServiceWithRetryForever createBasePath success");
+            // 注册服务节点
+            while (!registerServiceNode()) {
+                LOGGER.info("############# registerServiceWithRetryForever try registerServiceNode failure");
+                try {
+                    Thread.sleep(retryInterval);
+                } catch (InterruptedException e) {
+                    LOGGER.error(e.getMessage() , e);
+                }
+            }
+            LOGGER.info("############# registerServiceWithRetryForever registerServiceNode success");
+            // 增加链接状态监听器
+            addConnectionStateListener(retryInterval);
+        });
 
-            framework.getConnectionStateListenable().addListener(new ZkServiceRegisterConnectionStateListener(serviceInfo , basePath));
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        return false;
     }
 
 
-    class ZkServiceRegisterConnectionStateListener implements ConnectionStateListener {
-        Logger logger = LogManager.getLogger(ZkServiceRegisterConnectionStateListener.class);
-        private ServiceInfo serviceInfo;
-        private String basePath;
-        AtomicInteger lostConnectCounter = new AtomicInteger();
-        public ZkServiceRegisterConnectionStateListener(ServiceInfo serviceInfo, String basePath) {
-            this.serviceInfo = serviceInfo;
-            this.basePath = basePath;
+    /**
+     * 注册服务，只会注册一次，不会重复尝试
+     * @param reconnectRetryInterval 重连重新注册重试时间间隔
+     */
+    public void registerServiceOnlyOneTime(int reconnectRetryInterval){
+        if (!createBasePath()) {
+            LOGGER.info("############# registerServiceOnlyOneTime createBasePath failure , stop  register service");
+            return;
         }
+        boolean registerServiceNodeResult = registerServiceNode();
+        LOGGER.info("############# registerServiceOnlyOneTime registerServiceNode {}", registerServiceNodeResult ? "success" : "failure");
+        // 创建成功注册
+        if (registerServiceNodeResult) {
+            addConnectionStateListener(reconnectRetryInterval);
+        }
+    }
 
-        /**
-         * Called when there is a state change in the connection
-         *
-         * @param client   the client
-         * @param newState the new state
-         */
-        @Override
-        public void stateChanged(CuratorFramework client, ConnectionState newState) {
+    private String getServiceNodePath() {
+        return basePath + "/" + serviceInfo.getHostAndPort().getHost() + ":"
+                + serviceInfo.getHostAndPort().getPort() + "@" + serviceInfo.getPid();
+    }
+
+    /**
+     * 添加链接状态监听器
+     * @param reconnectRetryInterval 重连重新注册重试时间间隔
+     */
+    private void addConnectionStateListener(int reconnectRetryInterval) {
+        framework.getConnectionStateListenable().addListener((client, newState) -> {
+            String serviceNodePath = getServiceNodePath();
             // 重连状态
             if (Objects.equals(newState , ConnectionState.RECONNECTED)) {
-                logger.info("############# zookeeper reconnected deal begin");
-                String path = basePath + "/" + serviceInfo.getServiceName()
-                        + "/" + serviceInfo.getHostAndPort().getHost() + "_"
-                        + serviceInfo.getHostAndPort().getPort() + "_" + serviceInfo.getPid();
+                LOGGER.info("############# zookeeper reconnected deal begin");
+                Stat existStat = null;
                 try {
-                    Stat stat = client.checkExists().forPath(path);
-                    // 数据已经丢失
-                    if (stat == null) {
-                        try {
-                            client.create().creatingParentsIfNeeded()
-                                    .withMode(CreateMode.EPHEMERAL)
-                                    .withACL(ZooDefs.Ids.OPEN_ACL_UNSAFE)
-                                    .forPath(path);
-                            logger.info("############# retry register service path={} success." , path);
-                        } catch (Exception e) {
-
-                        }
-                    } else {
-                        logger.info("");
-                    }
+                    existStat = client.checkExists().forPath(serviceNodePath);
                 } catch (Exception e) {
-                    logger.error("############# retry register service path=" + path + " happen exception , " + e.getMessage() , e);
+                    LOGGER.error("############# zookeeper reconnected  checkExists path=" + serviceNodePath + " happen exception , " + e.getMessage() , e);
                 }
-                logger.info("############# zookeeper reconnected deal end");
+
+                // 数据已经丢失
+                if (existStat == null) {
+                    executorService.submit(()->{
+                        while (!registerServiceNode()) {
+                            LOGGER.info("############# zookeeper reconnected try register service failure");
+                            try {
+                                Thread.sleep(reconnectRetryInterval);
+                            } catch (InterruptedException e) {
+                                LOGGER.error(e.getMessage() , e);
+                            }
+                        }
+                    });
+                } else {
+                    LOGGER.info("############# lost connection path={} exist" , serviceNodePath);
+                }
+                LOGGER.info("############# zookeeper reconnected deal end");
             }
 
             // 重连状态
             if (Objects.equals(newState , ConnectionState.LOST)) {
-                lostConnectCounter.incrementAndGet();
-                logger.info("############# zookeeper lost connection lost times={} " , lostConnectCounter.get());
+                LOGGER.info("############# zookeeper lost connection lost");
             }
-
-
-        }
+        });
     }
 
-    class ServiceInfo {
+    /**
+     * 创建基本路径
+     * @return
+     */
+    public boolean createBasePath() {
+        Stat stat = null;
+        try {
+            stat = framework.checkExists().forPath(basePath);
+        } catch (Exception e) {
+            LOGGER.error("############# checkExists path=" + basePath + " exception: " + e.getMessage() , e);
+        }
+        // 判断basePath 是否已经存在
+        LOGGER.info("############# registerService checkExists basePath={} , stat={}" , basePath , stat);
+        if (stat == null) {
+            // 创建basePath
+            try {
+                framework.create().creatingParentsIfNeeded()
+                        .withMode(CreateMode.PERSISTENT)
+                        .withACL(ZooDefs.Ids.OPEN_ACL_UNSAFE).forPath(basePath);
+                LOGGER.info("############# registerService create basePath={} success" , basePath);
+            } catch (Exception e) {
+                LOGGER.error("############# registerService create basePath=" + basePath + " exception: " + e.getMessage(), e);
+                if (e instanceof KeeperException.NodeExistsException) {
+                    LOGGER.info("############# registerService create basePath={} success" , basePath);
+                } else {
+                    LOGGER.info("############# registerService create basePath={} failure" , basePath);
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    /**
+     * 注册服务节点
+     * @return
+     */
+    public boolean registerServiceNode(){
+        String path = getServiceNodePath();
+        try {
+            String nodeData = JSONObject.toJSONStringWithDateFormat(serviceInfo , "yyyy-MM-dd HH:mm:ss");
+            framework.create().creatingParentsIfNeeded()
+                    .withMode(CreateMode.EPHEMERAL)
+                    .withACL(ZooDefs.Ids.OPEN_ACL_UNSAFE).forPath(path , nodeData.getBytes("utf-8"));
+            LOGGER.info("############# registerServiceNode create path={} , data={} success" , path ,nodeData);
+        } catch (Exception e) {
+            LOGGER.error("############# registerServiceNode create path=" + path + " exception: " + e.getMessage(), e);
+            if (e instanceof KeeperException.NodeExistsException) {
+                LOGGER.info("############# registerServiceNode create path={} success" , path);
+            } else {
+                LOGGER.info("############# registerServiceNode create basePath={} failure" , path);
+                return false;
+            }
+        }
+        return true;
+    }
+
+    static class ServiceInfo {
 
         private Integer pid;
         private Date registerTime;
@@ -202,8 +252,14 @@ public class ZkServiceRegister {
 
 
     public static void main(String[] args) throws InterruptedException {
-        ZkServiceRegister zkServiceRegister = new ZkServiceRegister("/zk/test");
-        zkServiceRegister.registerService(null);
+        ServiceInfo serviceInfo = new ServiceInfo();
+        serviceInfo.setServiceName("app_name");
+        serviceInfo.setHostAndPort(HostAndPort.fromParts("127.0.0.2" , 10001));
+        serviceInfo.setPid(12345);
+        serviceInfo.setRegisterTime(new Date());
+        ZkServiceRegister zkServiceRegister = new ZkServiceRegister("/zk/test" , serviceInfo);
+        zkServiceRegister.registerServiceWithRetryForever(500);
         Thread.sleep(10000000);
     }
+
 }
