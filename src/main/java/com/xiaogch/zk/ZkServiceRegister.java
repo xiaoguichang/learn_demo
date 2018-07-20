@@ -2,6 +2,8 @@ package com.xiaogch.zk;
 
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.net.HostAndPort;
+import com.xiaogch.common.util.InetUtils;
+import com.xiaogch.common.util.SystemUtil;
 import org.apache.curator.RetryPolicy;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
@@ -36,23 +38,23 @@ public class ZkServiceRegister {
 
     private String connectUrl = "127.0.0.1:2181";
     private String basePath;
-    private CuratorFramework framework;
+    private CuratorFramework zkTools;
     private ServiceInfo serviceInfo;
 
-    private ExecutorService executorService = Executors.newFixedThreadPool(1);
+    private ExecutorService threadPool = Executors.newFixedThreadPool(1);
 
     public ZkServiceRegister(String basePath , ServiceInfo serviceInfo) {
         this.basePath = basePath + "/" + serviceInfo.getServiceName();
         this.serviceInfo = serviceInfo;
         RetryPolicy retryPolicy = new RetryForever(1000);
-        framework = CuratorFrameworkFactory.builder()
+        zkTools = CuratorFrameworkFactory.builder()
                 .connectString(connectUrl)
                 .connectionTimeoutMs(30*1000)
                 .sessionTimeoutMs(30*1000)
                 .retryPolicy(retryPolicy)
                 .build();
         LOGGER.info("############# start zookeeper client connectUrl={} begin." , connectUrl);
-        framework.start();
+        zkTools.start();
         LOGGER.info("############# start zookeeper client connectUrl={} end.", connectUrl);
     }
 
@@ -62,7 +64,7 @@ public class ZkServiceRegister {
      * @param retryInterval 重试时间间隔
      */
     public void registerServiceWithRetryForever(int retryInterval) {
-        executorService.submit(()->{
+        threadPool.submit(()->{
             while (!createBasePath()) {
                 LOGGER.info("############# registerServiceWithRetryForever createBasePath failure");
                 try {
@@ -116,7 +118,7 @@ public class ZkServiceRegister {
      * @param reconnectRetryInterval 重连重新注册重试时间间隔
      */
     private void addConnectionStateListener(int reconnectRetryInterval) {
-        framework.getConnectionStateListenable().addListener((client, newState) -> {
+        zkTools.getConnectionStateListenable().addListener((client, newState) -> {
             String serviceNodePath = getServiceNodePath();
             // 重连状态
             if (Objects.equals(newState , ConnectionState.RECONNECTED)) {
@@ -130,7 +132,7 @@ public class ZkServiceRegister {
 
                 // 数据已经丢失
                 if (existStat == null) {
-                    executorService.submit(()->{
+                    threadPool.submit(()->{
                         while (!registerServiceNode()) {
                             LOGGER.info("############# zookeeper reconnected try register service failure");
                             try {
@@ -160,7 +162,7 @@ public class ZkServiceRegister {
     public boolean createBasePath() {
         Stat stat = null;
         try {
-            stat = framework.checkExists().forPath(basePath);
+            stat = zkTools.checkExists().forPath(basePath);
         } catch (Exception e) {
             LOGGER.error("############# checkExists path=" + basePath + " exception: " + e.getMessage() , e);
         }
@@ -169,7 +171,7 @@ public class ZkServiceRegister {
         if (stat == null) {
             // 创建basePath
             try {
-                framework.create().creatingParentsIfNeeded()
+                zkTools.create().creatingParentsIfNeeded()
                         .withMode(CreateMode.PERSISTENT)
                         .withACL(ZooDefs.Ids.OPEN_ACL_UNSAFE).forPath(basePath);
                 LOGGER.info("############# registerService create basePath={} success" , basePath);
@@ -194,7 +196,7 @@ public class ZkServiceRegister {
         String path = getServiceNodePath();
         try {
             String nodeData = JSONObject.toJSONStringWithDateFormat(serviceInfo , "yyyy-MM-dd HH:mm:ss");
-            framework.create().creatingParentsIfNeeded()
+            zkTools.create().creatingParentsIfNeeded()
                     .withMode(CreateMode.EPHEMERAL)
                     .withACL(ZooDefs.Ids.OPEN_ACL_UNSAFE).forPath(path , nodeData.getBytes("utf-8"));
             LOGGER.info("############# registerServiceNode create path={} , data={} success" , path ,nodeData);
@@ -254,12 +256,11 @@ public class ZkServiceRegister {
     public static void main(String[] args) throws InterruptedException {
         ServiceInfo serviceInfo = new ServiceInfo();
         serviceInfo.setServiceName("app_name");
-        serviceInfo.setHostAndPort(HostAndPort.fromParts("127.0.0.2" , 10001));
-        serviceInfo.setPid(12345);
+        serviceInfo.setHostAndPort(HostAndPort.fromParts(SystemUtil.findLocalHostOrFirstNonLoopbackAddress() , SystemUtil.getPid()));
+        serviceInfo.setPid(SystemUtil.getPid());
         serviceInfo.setRegisterTime(new Date());
         ZkServiceRegister zkServiceRegister = new ZkServiceRegister("/zk/test" , serviceInfo);
         zkServiceRegister.registerServiceWithRetryForever(500);
-        Thread.sleep(10000000);
     }
 
 }
