@@ -1,10 +1,5 @@
 package com.xiaogch.guava;
 
-import com.google.common.util.concurrent.RateLimiter;
-import com.xiaogch.entity.UserInfoEntity;
-
-import java.util.Objects;
-
 /**
  * ProjectName: demo<BR>
  * File name: CommonUtil.java <BR>
@@ -17,10 +12,32 @@ import java.util.Objects;
  */
 public class ObjectsTest {
 
-    public static void main(String[] args) {
-//        UserInfoEntity userInfoEntity = new UserInfoEntity();
-//        System.out.println(Objects.toString(userInfoEntity));
-        RateLimiter rateLimiter = RateLimiter.create(100);
+    static A a1;
 
+    {
+        a1 = new A(1);
+    }
+
+    static A a2 = new A(2);
+
+    ObjectsTest() {
+        System.out.print("ObjectsTest()");
+        a2.f(1);
+    }
+
+    public static void main(String[] args) {
+        ObjectsTest objectsTest = new ObjectsTest();
+    }
+
+
+}
+
+class A {
+    public A(int i) {
+        System.out.print("A(" + i +")");
+    }
+
+    public void f(int i) {
+        System.out.print("A.f(" + i +")");
     }
 }

@@ -1,6 +1,7 @@
 package com.xiaogch.zk;
 
 import org.apache.curator.framework.CuratorFramework;
+import org.apache.curator.framework.recipes.cache.PathChildrenCache;
 import org.apache.curator.framework.recipes.cache.PathChildrenCacheEvent;
 
 /**
@@ -15,13 +16,15 @@ import org.apache.curator.framework.recipes.cache.PathChildrenCacheEvent;
  */
 public interface ZkChildrenWatch {
 
-    void onChildAdd(CuratorFramework framework , String basePath , PathChildrenCacheEvent event);
+    void onRegister(CuratorFramework framework , String basePath);
 
-    void onChildRemove(CuratorFramework framework , String basePath , PathChildrenCacheEvent event);
+    void onChildAdd(CuratorFramework framework, String basePath, PathChildrenCacheEvent event, PathChildrenCache pathChildrenCache);
 
-    void onChildUpdate(CuratorFramework framework , String basePath , PathChildrenCacheEvent event);
+    void onChildRemove(CuratorFramework framework, String basePath, PathChildrenCacheEvent event, PathChildrenCache pathChildrenCache);
 
-    void onLostConnect(CuratorFramework framework , String basePath , PathChildrenCacheEvent event);
+    void onChildUpdate(CuratorFramework framework, String basePath, PathChildrenCacheEvent event, PathChildrenCache pathChildrenCache);
 
-    void onReconnected(CuratorFramework framework , String basePath , PathChildrenCacheEvent event);
+    void onLostConnect(CuratorFramework framework, String basePath, PathChildrenCacheEvent event, PathChildrenCache pathChildrenCache);
+
+    void onReconnected(CuratorFramework framework, String basePath, PathChildrenCacheEvent event, PathChildrenCache pathChildrenCache);
 }

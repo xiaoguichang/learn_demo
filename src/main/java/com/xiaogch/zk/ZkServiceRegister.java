@@ -1,8 +1,11 @@
 package com.xiaogch.zk;
 
 import com.alibaba.fastjson.JSONObject;
-import com.google.common.net.HostAndPort;
 import com.xiaogch.common.util.SystemUtil;
+import com.xiaogch.zk.enums.ServiceEnum;
+import com.xiaogch.zk.enums.ServiceEnv;
+import com.xiaogch.zk.enums.ServiceMode;
+import com.xiaogch.zk.enums.ServiceType;
 import org.apache.curator.RetryPolicy;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
@@ -35,15 +38,12 @@ public class ZkServiceRegister {
     private static Logger LOGGER = LogManager.getLogger(ZkServiceRegister.class);
 
     private String connectUrl = "127.0.0.1:2181";
-    private String basePath;
+    private final String basePath = ZkConstants.ZK_SERVICE_BASE_PATH;
     private CuratorFramework zkTools;
-    private ServiceInfo serviceInfo;
 
     private ExecutorService threadPool = Executors.newFixedThreadPool(1);
 
-    public ZkServiceRegister(String basePath , ServiceInfo serviceInfo) {
-        this.basePath = basePath + "/" + serviceInfo.getServiceName();
-        this.serviceInfo = serviceInfo;
+    public ZkServiceRegister() {
         RetryPolicy retryPolicy = new RetryForever(1000);
         zkTools = CuratorFrameworkFactory.builder()
                 .connectString(connectUrl)
@@ -61,9 +61,9 @@ public class ZkServiceRegister {
      * 注册服务，如果失败会一直尝试注册，直到注册成功为止
      * @param retryInterval 重试时间间隔
      */
-    public void registerServiceWithRetryForever(int retryInterval) {
+    public void registerServiceWithRetryForever(int retryInterval , ServiceInfo serviceInfo) {
         threadPool.submit(()->{
-            while (!createBasePath()) {
+            while (!createBasePath(serviceInfo)) {
                 LOGGER.info("############# registerServiceWithRetryForever createBasePath failure");
                 try {
                     Thread.sleep(retryInterval);
@@ -73,7 +73,7 @@ public class ZkServiceRegister {
             }
             LOGGER.info("############# registerServiceWithRetryForever createBasePath success");
             // 注册服务节点
-            while (!registerServiceNode()) {
+            while (!registerServiceNode(serviceInfo)) {
                 LOGGER.info("############# registerServiceWithRetryForever try registerServiceNode failure");
                 try {
                     Thread.sleep(retryInterval);
@@ -83,7 +83,7 @@ public class ZkServiceRegister {
             }
             LOGGER.info("############# registerServiceWithRetryForever registerServiceNode success");
             // 增加链接状态监听器
-            addConnectionStateListener(retryInterval);
+            addConnectionStateListener(retryInterval , serviceInfo);
         });
 
     }
@@ -93,21 +93,25 @@ public class ZkServiceRegister {
      * 注册服务，只会注册一次，不会重复尝试
      * @param reconnectRetryInterval 重连重新注册重试时间间隔
      */
-    public void registerServiceOnlyOneTime(int reconnectRetryInterval){
-        if (!createBasePath()) {
+    public void registerServiceOnlyOneTime(int reconnectRetryInterval , ServiceInfo serviceInfo){
+        if (!createBasePath(serviceInfo)) {
             LOGGER.info("############# registerServiceOnlyOneTime createBasePath failure , stop  register service");
             return;
         }
-        boolean registerServiceNodeResult = registerServiceNode();
+        boolean registerServiceNodeResult = registerServiceNode(serviceInfo);
         LOGGER.info("############# registerServiceOnlyOneTime registerServiceNode {}", registerServiceNodeResult ? "success" : "failure");
         // 创建成功注册
         if (registerServiceNodeResult) {
-            addConnectionStateListener(reconnectRetryInterval);
+            addConnectionStateListener(reconnectRetryInterval , serviceInfo);
         }
     }
 
-    private String getServiceNodePath() {
-        return basePath + "/" + serviceInfo.getHostAndPort().getHost() + ":"
+    private String getServiceNodeBasePath(ServiceInfo serviceInfo) {
+        return basePath + "/" + serviceInfo.getServiceCode();
+    }
+
+    private String getServiceNodePath(ServiceInfo serviceInfo) {
+        return getServiceNodeBasePath(serviceInfo) + "/" + serviceInfo.getHostAndPort().getHost() + ":"
                 + serviceInfo.getHostAndPort().getPort() + "@" + serviceInfo.getPid();
     }
 
@@ -115,9 +119,9 @@ public class ZkServiceRegister {
      * 添加链接状态监听器
      * @param reconnectRetryInterval 重连重新注册重试时间间隔
      */
-    private void addConnectionStateListener(int reconnectRetryInterval) {
+    private void addConnectionStateListener(int reconnectRetryInterval, ServiceInfo serviceInfo) {
         zkTools.getConnectionStateListenable().addListener((client, newState) -> {
-            String serviceNodePath = getServiceNodePath();
+            String serviceNodePath = getServiceNodePath(serviceInfo);
             // 重连状态
             if (Objects.equals(newState , ConnectionState.RECONNECTED)) {
                 LOGGER.info("############# zookeeper reconnected deal begin");
@@ -131,7 +135,7 @@ public class ZkServiceRegister {
                 // 数据已经丢失
                 if (existStat == null) {
                     threadPool.submit(()->{
-                        while (!registerServiceNode()) {
+                        while (!registerServiceNode(serviceInfo)) {
                             LOGGER.info("############# zookeeper reconnected try register service failure");
                             try {
                                 Thread.sleep(reconnectRetryInterval);
@@ -157,28 +161,29 @@ public class ZkServiceRegister {
      * 创建基本路径
      * @return
      */
-    public boolean createBasePath() {
+    public boolean createBasePath(ServiceInfo serviceInfo) {
         Stat stat = null;
+        String path= getServiceNodeBasePath(serviceInfo);
         try {
-            stat = zkTools.checkExists().forPath(basePath);
+            stat = zkTools.checkExists().forPath(path);
         } catch (Exception e) {
-            LOGGER.error("############# checkExists path=" + basePath + " exception: " + e.getMessage() , e);
+            LOGGER.error("############# checkExists path=" + path + " exception: " + e.getMessage() , e);
         }
         // 判断basePath 是否已经存在
-        LOGGER.info("############# registerService checkExists basePath={} , stat={}" , basePath , stat);
+        LOGGER.info("############# registerService checkExists basePath={} , stat={}" , path , stat);
         if (stat == null) {
             // 创建basePath
             try {
                 zkTools.create().creatingParentsIfNeeded()
                         .withMode(CreateMode.PERSISTENT)
-                        .withACL(ZooDefs.Ids.OPEN_ACL_UNSAFE).forPath(basePath);
-                LOGGER.info("############# registerService create basePath={} success" , basePath);
+                        .withACL(ZooDefs.Ids.OPEN_ACL_UNSAFE).forPath(path);
+                LOGGER.info("############# registerService create basePath={} success" , path);
             } catch (Exception e) {
-                LOGGER.error("############# registerService create basePath=" + basePath + " exception: " + e.getMessage(), e);
+                LOGGER.error("############# registerService create basePath=" + path + " exception: " + e.getMessage(), e);
                 if (e instanceof KeeperException.NodeExistsException) {
-                    LOGGER.info("############# registerService create basePath={} success" , basePath);
+                    LOGGER.info("############# registerService create basePath={} success" , path);
                 } else {
-                    LOGGER.info("############# registerService create basePath={} failure" , basePath);
+                    LOGGER.info("############# registerService create basePath={} failure" , path);
                     return false;
                 }
             }
@@ -190,8 +195,8 @@ public class ZkServiceRegister {
      * 注册服务节点
      * @return
      */
-    public boolean registerServiceNode(){
-        String path = getServiceNodePath();
+    public boolean registerServiceNode(ServiceInfo serviceInfo){
+        String path = getServiceNodePath(serviceInfo);
         try {
             String nodeData = JSONObject.toJSONStringWithDateFormat(serviceInfo , "yyyy-MM-dd HH:mm:ss");
             zkTools.create().creatingParentsIfNeeded()
@@ -210,55 +215,18 @@ public class ZkServiceRegister {
         return true;
     }
 
-    static class ServiceInfo {
-
-        private Integer pid;
-        private Date registerTime;
-        private String serviceName;
-        private HostAndPort hostAndPort;
-
-        public Integer getPid() {
-            return pid;
-        }
-
-        public void setPid(Integer pid) {
-            this.pid = pid;
-        }
-
-        public Date getRegisterTime() {
-            return registerTime;
-        }
-
-        public void setRegisterTime(Date registerTime) {
-            this.registerTime = registerTime;
-        }
-
-        public String getServiceName() {
-            return serviceName;
-        }
-
-        public void setServiceName(String serviceName) {
-            this.serviceName = serviceName;
-        }
-
-        public HostAndPort getHostAndPort() {
-            return hostAndPort;
-        }
-
-        public void setHostAndPort(HostAndPort hostAndPort) {
-            this.hostAndPort = hostAndPort;
-        }
-    }
-
 
     public static void main(String[] args) throws InterruptedException {
-        ServiceInfo serviceInfo = new ServiceInfo();
-        serviceInfo.setServiceName("app_name");
-        serviceInfo.setHostAndPort(HostAndPort.fromParts(SystemUtil.findLocalHostOrFirstNonLoopbackAddress() , SystemUtil.getPid()));
+        ServiceInfo serviceInfo = new ServiceInfo(ServiceEnum.WECHAT);
+        serviceInfo.setHostAndPort(new HostAndPort(SystemUtil.findLocalHostOrFirstNonLoopbackAddress() , SystemUtil.getPid()));
         serviceInfo.setPid(SystemUtil.getPid());
-        serviceInfo.setRegisterTime(new Date());
-        ZkServiceRegister zkServiceRegister = new ZkServiceRegister("/zk/test" , serviceInfo);
-        zkServiceRegister.registerServiceWithRetryForever(500);
+        serviceInfo.setServiceEnv(ServiceEnv.DEVP);
+        serviceInfo.setServiceMode(ServiceMode.GRAY);
+        serviceInfo.setServiceType(ServiceType.RPC);
+        serviceInfo.setStartupTime(new Date());
+
+        ZkServiceRegister zkServiceRegister = new ZkServiceRegister();
+        zkServiceRegister.registerServiceWithRetryForever(500 , serviceInfo);
     }
 
 }
