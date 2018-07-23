@@ -2,14 +2,12 @@ package com.xiaogch.zk;
 
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.net.HostAndPort;
-import com.xiaogch.common.util.InetUtils;
 import com.xiaogch.common.util.SystemUtil;
 import org.apache.curator.RetryPolicy;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
 import org.apache.curator.framework.state.ConnectionState;
 import org.apache.curator.retry.RetryForever;
-import org.apache.http.conn.util.InetAddressUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.zookeeper.CreateMode;
