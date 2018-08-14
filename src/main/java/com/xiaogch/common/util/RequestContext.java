@@ -1,7 +1,8 @@
-package com.xiaogch.gateway;
+package com.xiaogch.common.util;
 
 import com.xiaogch.gateway.http.GatewayHttpRequest;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -44,5 +45,26 @@ public class RequestContext extends ConcurrentHashMap<String , Object> {
 
     public void setGatewayHttpRequest(GatewayHttpRequest httpRequest){
         this.put("httpRequest" , httpRequest);
+    }
+
+
+    public void setRequestBeginTime(Long value) {
+        this.put("requestBeginTime" , value);
+    }
+
+    public Long getRequestBeginTime() {
+        return (Long) this.get("requestBeginTime");
+    }
+
+    public HttpServletRequest getHttpServletRequest() {
+        return (HttpServletRequest) this.get("httpServletRequest");
+    }
+
+    public void setHttpServletRequest(HttpServletRequest value) {
+        this.put("httpServletRequest" , value);
+    }
+
+    public void unset() {
+        threadLocal.remove();
     }
 }

@@ -1,5 +1,7 @@
 package com.xiaogch.common.http.response;
 
+import org.omg.CORBA.OBJ_ADAPTER;
+
 import java.io.Serializable;
 
 /**
@@ -7,39 +9,27 @@ import java.io.Serializable;
  */
 public class Response implements Serializable {
 
-    private Integer code;
+    private int code;
 
     private String msg;
 
     private Object data;
 
     public Response() {
-        this(ResponseCode.SUCCESS , new Object());
+
     }
 
-    public Response(Object data) {
-        this(ResponseCode.SUCCESS , data);
-    }
-
-    public Response(ResponseCode responseResult , Object data) {
-        this(responseResult.getCode() , responseResult.getMsg()  , data);
-    }
-
-    public Response(Integer code, String msg , Object data) {
+    public Response(int code , String message , Object data) {
         this.code = code;
-        this.msg = msg;
-        if (data == null) {
-            this.data = new Object();
-        } else {
-            this.data = data;
-        }
+        this.msg = message;
+        this.data = data;
     }
 
-    public Integer getCode() {
+    public int getCode() {
         return code;
     }
 
-    public void setCode(Integer code) {
+    public void setCode(int code) {
         this.code = code;
     }
 
@@ -62,4 +52,36 @@ public class Response implements Serializable {
             this.data = data;
         }
     }
+
+    public static Response buildSuccessRsp(){
+        return new Response(ResponseCode.SUCCESS.getCode() ,
+                ResponseCode.SUCCESS.getMsg() , new Object());
+    }
+
+    public static Response buildSuccessRsp(Object data){
+        return new Response(ResponseCode.SUCCESS.getCode() ,
+                ResponseCode.SUCCESS.getMsg() ,data == null ? new Object() : data);
+    }
+
+    public static Response buildFailureRsp(ResponseCode rspCode){
+        return buildRsp(rspCode.getCode() , rspCode.getMsg() , new Object());
+    }
+
+    public static Response buildFailureRsp(ResponseCode rspCode , Object data){
+        return buildRsp(rspCode.getCode() , rspCode.getMsg() , data == null ? new Object() : data);
+    }
+
+    public static Response buildFailureRsp(ResponseCode rspCode , String msg){
+        return buildRsp(rspCode.getCode() , msg , new Object());
+    }
+
+    public static Response buildFailureRsp(ResponseCode rspCode , String msg , Object data){
+        return buildRsp(rspCode.getCode() , msg , data == null ? new Object() : data);
+    }
+
+    public static Response buildRsp(int code , String msg , Object data){
+        return new Response(code , msg , data);
+    }
+
+
 }

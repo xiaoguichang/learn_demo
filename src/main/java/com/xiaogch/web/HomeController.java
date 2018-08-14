@@ -1,7 +1,10 @@
 package com.xiaogch.web;
 
 import com.xiaogch.common.http.response.Response;
-import org.springframework.web.bind.annotation.CrossOrigin;
+import com.xiaogch.common.redis.annotation.RedisDatasource;
+import com.xiaogch.system.Systems;
+import com.xiaogch.wechat.common.service.FormIdService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -21,10 +24,29 @@ import java.util.Map;
 @RestController
 public class HomeController extends BaseController {
 
+    @Autowired
+    FormIdService formIdService;
+
     @RequestMapping("/")
-    Object home() {
+    public Object home() {
         Map<String  , Object> data = new HashMap<>();
         data.put("welcomeMessage" , "hello , welcome to spring boot world");
-        return new Response(data);
+        return Response.buildSuccessRsp(data);
     }
+
+    @RequestMapping("/master/commitFormId")
+    @RedisDatasource("defaultRedisDatasource")
+    public Object commitFormId(Integer userId , String formId) {
+        formIdService.saveFromIdToRedis(Systems.TEST  , formId , userId ,  System.currentTimeMillis());
+        return Response.buildSuccessRsp();
+    }
+
+    @RequestMapping("/slave/commitFormId")
+    @RedisDatasource("slaveRedisDatasource")
+    public Object commitFormId(int userId , String formId) {
+        formIdService.saveFromIdToRedis(Systems.TEST  , formId , userId ,  System.currentTimeMillis());
+        return Response.buildSuccessRsp();
+    }
+
+
 }

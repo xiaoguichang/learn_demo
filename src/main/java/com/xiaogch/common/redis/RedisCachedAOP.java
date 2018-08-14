@@ -1,4 +1,4 @@
-package com.xiaogch.common.redis.annotation.impl;
+package com.xiaogch.common.redis;
 
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.After;

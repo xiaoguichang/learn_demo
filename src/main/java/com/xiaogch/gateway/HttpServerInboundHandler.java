@@ -1,5 +1,6 @@
 package com.xiaogch.gateway;
 
+import com.xiaogch.common.util.RequestContext;
 import com.xiaogch.gateway.filter.GatewayRunner;
 import com.xiaogch.gateway.http.GatewayHttpRequest;
 import io.netty.buffer.Unpooled;

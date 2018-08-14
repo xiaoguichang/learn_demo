@@ -2,30 +2,12 @@ package com.xiaogch.common.redis.standalone;
 
 import com.alibaba.fastjson.JSONObject;
 import com.xiaogch.common.redis.RedisException;
-import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.Transaction;
 
 import java.util.List;
 import java.util.Map;
 
 public class RedisHashService extends RedisService {
-
-    private JedisPool jedisPool;
-    private String key ;
-
-    public RedisHashService(JedisPool jedisPool) {
-        this(jedisPool , "hash.default");
-    }
-
-    public RedisHashService(JedisPool jedisPool, String key) {
-        super(jedisPool);
-        this.jedisPool = jedisPool;
-        this.key = key;
-    }
-
-    public String hget(String field) throws RedisException {
-        return this.hget(key , field);
-    }
 
     public String hget(String key , String field) throws RedisException {
         return execute(jedis -> jedis.hget(key , field));
@@ -38,10 +20,6 @@ public class RedisHashService extends RedisService {
             return JSONObject.parseObject(value , tClass);
         }
         return null;
-    }
-
-    public Long hset(String field , String value) throws RedisException {
-        return this.hset(key , field , value);
     }
 
     /***
@@ -83,24 +61,12 @@ public class RedisHashService extends RedisService {
         return execute(jedis -> jedis.hmget(key , fields));
     }
 
-    public Long hincr(String field) throws RedisException {
-        return hincr(key , field , 1l);
-    }
-
-    public Long hincr(String field , long increament) throws RedisException {
-        return hincr(key , field , increament);
-
-    }
     public Long hincr(String key , String field) throws RedisException {
         return hincr(key , field , 1l);
     }
 
     public Long hincr(String key , String field , long increament) throws RedisException {
         return execute(jedis -> jedis.hincrBy(key , field , increament));
-    }
-
-    public boolean hexist(String field) throws RedisException{
-        return hexist(key , field);
     }
 
     public boolean hexist(String key , String field) throws RedisException{

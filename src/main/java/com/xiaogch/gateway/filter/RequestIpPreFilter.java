@@ -1,6 +1,6 @@
 package com.xiaogch.gateway.filter;
 
-import com.xiaogch.gateway.RequestContext;
+import com.xiaogch.common.util.RequestContext;
 import com.xiaogch.gateway.http.GatewayHttpRequest;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

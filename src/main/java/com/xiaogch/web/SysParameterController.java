@@ -27,7 +27,7 @@ public class SysParameterController extends BaseController {
     @RequestMapping("get/{code}")
     public Object getByCode(@PathVariable String code) {
         SysParameterEntity data = sysParameterDao.selectByCode(code);
-        return new Response(data);
+        return Response.buildSuccessRsp(data);
     }
 
     @RequestMapping("add/{code}")
@@ -36,7 +36,7 @@ public class SysParameterController extends BaseController {
         sysParameterEntity.setCode(code);
         sysParameterEntity.setValue(value);
         sysParameterDao.insert(sysParameterEntity);
-        return new Response();
+        return Response.buildSuccessRsp();
     }
 
     @RequestMapping("update/{code}")
@@ -51,7 +51,7 @@ public class SysParameterController extends BaseController {
         Map<String  , Object> data = new HashMap<>();
         data.put("success" , true);
         data.put("success" , result >= 1 ? "delete record" : "record not exist");
-        return new Response(data);
+        return Response.buildSuccessRsp(data);
 
     }
 
@@ -60,7 +60,7 @@ public class SysParameterController extends BaseController {
                           @RequestParam(value = "size") Integer size) {
         List<SysParameterEntity> list = sysParameterDao.selectList(offset, size);
         PagedResponse data = new PagedResponse(offset , list);
-        return new Response(data);
+        return Response.buildSuccessRsp(data);
     }
 
 }

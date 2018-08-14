@@ -81,7 +81,7 @@ public class ZkServiceDiscover {
                         case CHILD_ADDED:
                             LOGGER.info("############# path={} CHILD_ADDED" , path+"/" + event.getData().getPath());
                             LOGGER.info("############# CHILD_ADDED before serviceInfo is {}" , serviceMeta.get(serviceEnum));
-                            updateOrAddServce(serviceEnum , event);
+                            updateOrAddService(serviceEnum , event);
                             LOGGER.info("############# CHILD_ADDED after serviceInfo is {}" , serviceMeta.get(serviceEnum));
                             break;
                         case CHILD_REMOVED:
@@ -93,7 +93,7 @@ public class ZkServiceDiscover {
                         case CHILD_UPDATED:
                             LOGGER.info("############# path={} CHILD_UPDATED" , path+"/" + event.getData().getPath());
                             LOGGER.info("############# CHILD_UPDATED before serviceInfo is {}" , serviceMeta.get(serviceEnum));
-                            updateOrAddServce(serviceEnum , event);
+                            updateOrAddService(serviceEnum , event);
                             LOGGER.info("############# CHILD_UPDATED after serviceInfo is {}" , serviceMeta.get(serviceEnum));
                             break;
                         case CONNECTION_LOST:
@@ -139,11 +139,16 @@ public class ZkServiceDiscover {
     }
 
 
-    private synchronized void updateOrAddServce(ServiceEnum serviceEnum, PathChildrenCacheEvent event) {
+    /**
+     * 更新或添加服务
+     * @param serviceEnum
+     * @param event
+     */
+    private synchronized void updateOrAddService(ServiceEnum serviceEnum, PathChildrenCacheEvent event) {
 
         byte[] data = event.getData().getData();
         String tempData = new String(data);
-        LOGGER.info("############# addService serviceEnum={} , path={} , childrenData={}" , serviceEnum , event.getData().getPath() , tempData);
+        LOGGER.info("############# updateOrAddService serviceEnum={} , path={} , childrenData={}" , serviceEnum , event.getData().getPath() , tempData);
         ServiceInfo tempServiceInfo  = JSONObject.parseObject(tempData , ServiceInfo.class);
         ServiceEnum tempServiceEnum = ServiceEnum.getServiceEnum(tempServiceInfo.getServiceCode());
         if (ServiceEnum.UNKNOWN == serviceEnum || serviceEnum != tempServiceEnum) {

@@ -39,7 +39,7 @@ public class ControllerExceptionHandler {
 
     public Object exceptionHandle(Exception e) {
         logger.error(e.getMessage(), e);
-        Response response = new Response(ResponseCode.SYS_ERROR);
+        Response response = Response.buildFailureRsp(ResponseCode.SYS_ERROR);
         response.setMsg(e.getClass().getName());
 
         String responseString = JSONObject.toJSONStringWithDateFormat(response ,

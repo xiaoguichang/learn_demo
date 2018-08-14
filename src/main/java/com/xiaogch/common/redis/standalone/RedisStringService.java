@@ -1,6 +1,7 @@
 package com.xiaogch.common.redis.standalone;
 
 import com.alibaba.fastjson.JSONObject;
+import com.xiaogch.common.redis.RedisDatasourceFactory;
 import com.xiaogch.common.redis.RedisException;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.Transaction;
@@ -19,29 +20,8 @@ import java.util.List;
  */
 public class RedisStringService extends RedisService {
 
-    private JedisPool jedisPool;
-    private String key ;
-
-    public RedisStringService(JedisPool jedisPool) {
-        this(jedisPool , "string.default");
-    }
-
-    public RedisStringService(JedisPool jedisPool, String key) {
-        super(jedisPool);
-        this.jedisPool = jedisPool;
-        this.key = key;
-    }
-
-    public String get() {
-        return this.get(key);
-    }
-
     public String get(String key) {
         return execute(jedis -> jedis.get(key));
-    }
-
-    public boolean set(String value) {
-        return this.set(key , value);
     }
 
     public boolean set(String key , String value) {
@@ -49,10 +29,6 @@ public class RedisStringService extends RedisService {
             String setResult = jedis.set(key , value);
             return STATUS_CODE_OK.equalsIgnoreCase(setResult);
         });
-    }
-
-    public boolean set(String value , int second) {
-        return this.set(key , value , second);
     }
 
     public boolean set(String key , String value , int second) {
@@ -73,18 +49,6 @@ public class RedisStringService extends RedisService {
             return false;
         });
     }
-
-    /***
-     * 获取redis分布式锁
-     * @param lockTime 锁持续时间（毫秒）
-     * @param timeOut 超时时间（毫秒）
-     * @return true：获得锁，false：未获得锁
-     * @throws RedisException
-     */
-    public boolean getLock(int lockTime , long timeOut) {
-        return getLock(key , lockTime , timeOut);
-    }
-
 
     /***
      * 获取redis分布式锁
@@ -125,15 +89,6 @@ public class RedisStringService extends RedisService {
         });
     }
 
-    /***
-     * 释放redis分布式锁
-     * @return true：释放锁成功，false：释放锁失败
-     * @throws RedisException
-     */
-    public boolean releaseLock() {
-        return releaseLock(key);
-    }
-
     public <T> T getValue(String key , Class<T> tClass) {
         String value = get(key);
         if (value != null) {
@@ -146,13 +101,6 @@ public class RedisStringService extends RedisService {
     public boolean setValue(String key , Object value , int second) {
         String valueJson = JSONObject.toJSONString(value);
         return set(key , valueJson , second);
-    }
-
-    public List<String> mget(String...keys) {
-        return execute(jedis -> {
-            jedis = jedisPool.getResource();
-            return jedis.mget(keys);
-        });
     }
 
     public Long incr(String key)  {

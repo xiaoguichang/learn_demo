@@ -1,8 +1,10 @@
 package com.xiaogch.common.redis.standalone;
 
+import com.xiaogch.common.redis.RedisDatasourceFactory;
 import com.xiaogch.common.redis.RedisException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 
@@ -24,26 +26,13 @@ public class RedisService {
 
     static Logger LOGGER = LogManager.getLogger(RedisService.class);
 
-    private JedisPool jedisPool;
-
-    public RedisHashService buildRedisHashService(String key){
-        return new RedisHashService(jedisPool , key);
-    }
-
-    public RedisStringService buildRedisStringService(String key){
-        return new RedisStringService(jedisPool , key);
-    }
-
-
-
-    public RedisService(JedisPool jedisPool) {
-        this.jedisPool = jedisPool;
-    }
+    @Autowired
+    private RedisDatasourceFactory redisDatasourceFactory;
 
     protected  <T> T execute(Function<Jedis , T> function) {
         Jedis jedis = null;
         try {
-            jedis = jedisPool.getResource();
+            jedis = redisDatasourceFactory.getJedisPool().getResource();
             return function.apply(jedis);
         } catch (Exception e) {
             throw new RedisException("redis operate exception" , e);
