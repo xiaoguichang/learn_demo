@@ -1,13 +1,11 @@
 package com.xiaogch.conf.database;
 
 import org.apache.logging.log4j.LogManager;
-import org.aspectj.lang.JoinPoint;
-import org.aspectj.lang.Signature;
-import org.aspectj.lang.annotation.After;
-import org.aspectj.lang.annotation.Aspect;
-import org.aspectj.lang.annotation.Before;
-import org.aspectj.lang.annotation.Pointcut;
 import org.apache.logging.log4j.Logger;
+import org.aspectj.lang.ProceedingJoinPoint;
+import org.aspectj.lang.annotation.Around;
+import org.aspectj.lang.annotation.Aspect;
+import org.aspectj.lang.annotation.Pointcut;
 import org.springframework.stereotype.Component;
 
 /**
@@ -28,42 +26,37 @@ public class DatasourceSelectAop {
 
     }
 
-    @Before(value = "pointCutSelect()")
-    public void setSalveDatasource(JoinPoint joinPoint) {
-        Signature signature = joinPoint.getSignature();
-        logger.info("signature.getModifiers() {}", signature.getModifiers());
-        logger.info("signature.getName() {}", signature.getName());
-        logger.info("signature.getDeclaringTypeName() {}", signature.getDeclaringTypeName());
-        logger.info("signature.getDeclaringType() {}", signature.getDeclaringType());
-        logger.info("signature.getClass() {}", signature.getClass());
-
-        logger.info("joinPoint.getKind() {}", joinPoint.getKind());
-        logger.info("joinPoint.getTarget() {}", joinPoint.getTarget());
-        logger.info("joinPoint.getArgs() {}", joinPoint.getArgs());
-        logger.info("joinPoint.getSourceLocation() {}", joinPoint.getSourceLocation());
-        logger.info("joinPoint.getStaticPart() {}", joinPoint.getStaticPart());
-
+    @Around(value = "pointCutSelect()")
+    public Object dealWithAroundForPointCutSelect(ProceedingJoinPoint joinPoint) {
         DatasourceContextHolder.selectSlave();
+        try {
+            return joinPoint.proceed();
+        } catch (Throwable throwable) {
+            throw new RuntimeException(throwable);
+        } finally {
+            DatasourceContextHolder.clearDatasourceType();
+        }
+
     }
 
 
     @Pointcut("execution(* com.xiaogch..*.dao..*.insert*(..)) " +
             "|| execution(* com.xiaogch..*.dao..*.update*(..)) " +
             "|| execution(* com.xiaogch..*.dao..*.delete*(..))")
-//            "|| execution(* com.xiaogch.springboot.mapper..*.insert*(..)) " +
-//            "|| execution(* com.xiaogch.springboot.mapper..*.update*(..)) " +
-//            "|| execution(* com.xiaogch.springboot.mapper..*.delete*(..)))")
     public void pointCutUpdate() {
 
     }
 
-    @Before(value = "pointCutUpdate()")
-    public void setMasterDatasource(JoinPoint joinPoint) {
+    @Around(value = "pointCutUpdate()")
+    public Object dealWithAroundForointCutUpdate(ProceedingJoinPoint joinPoint) {
         DatasourceContextHolder.selectMaster();
+        try {
+            return joinPoint.proceed();
+        } catch (Throwable throwable) {
+            throw new RuntimeException(throwable);
+        } finally {
+            DatasourceContextHolder.clearDatasourceType();
+        }
     }
 
-    @After(" pointCutUpdate() || pointCutSelect()")
-    public void clearDatasource() {
-        DatasourceContextHolder.clearDatasourceType();
-    }
 }
