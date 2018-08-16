@@ -12,18 +12,18 @@ package com.xiaogch.rpc;
  */
 public class RpcRequest {
 
-    private long transactionId;
+    private Long requestId;
     private String serviceClassName;
     private String methodName;
     private Class[] parameterTypes;
     private Object[] parameters;
 
-    public long getTransactionId() {
-        return transactionId;
+    public Long getRequestId() {
+        return requestId;
     }
 
-    public void setTransactionId(long transactionId) {
-        this.transactionId = transactionId;
+    public void setRequestId(Long requestId) {
+        this.requestId = requestId;
     }
 
     public String getServiceClassName() {

@@ -3,8 +3,8 @@ package com.xiaogch.rpc;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 
-import java.util.concurrent.Callable;
-import java.util.concurrent.Future;
+import java.util.Map;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
@@ -21,7 +21,11 @@ public class RpcClientHandler extends ChannelInboundHandlerAdapter {
 
     AtomicLong atomicLong = new AtomicLong(0);
 
+    private static final long timeout = 60000;
+
     private ChannelHandlerContext channelHandlerContext;
+
+    private Map<Long , SendRequestCallable> callableMap = new ConcurrentHashMap<>(1000);
 
     public RpcClientHandler() {
         super();
@@ -80,6 +84,7 @@ public class RpcClientHandler extends ChannelInboundHandlerAdapter {
 
     class SendRequestCallable implements Callable<Object> {
 
+        private CountDownLatch countDownLatch = new CountDownLatch(1);
         private RpcRequest rpcRequest;
         private RpcResponse rpcResponse;
 
@@ -97,13 +102,13 @@ public class RpcClientHandler extends ChannelInboundHandlerAdapter {
         @Override
         public Object call() throws Exception {
             channelHandlerContext.writeAndFlush(rpcRequest);
-            wait();
+            countDownLatch.await(timeout , TimeUnit.MILLISECONDS);
             return rpcResponse.getData();
         }
 
         public void setResult(RpcResponse rpcResponse){
             this.rpcResponse = rpcResponse;
-            notify();
+            countDownLatch.countDown();
         }
     }
 }

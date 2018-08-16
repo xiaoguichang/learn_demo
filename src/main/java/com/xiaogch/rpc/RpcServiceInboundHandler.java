@@ -50,11 +50,23 @@ public class RpcServiceInboundHandler extends ChannelInboundHandlerAdapter {
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
         if (msg != null && msg instanceof RpcRequest) {
             RpcRequest rpcRequest = (RpcRequest) msg;
-            RpcServiceMeta rpcServiceMeta = RpcServiceRegistry.getRpcServiceMeta(rpcRequest.getServiceClassName());
-            RpcMethodHandler rpcMethodHandler = rpcServiceMeta.getRpcMethodHandler(rpcRequest.getMethodName() , rpcRequest.getParameterTypes());
-            Object object = rpcMethodHandler.invoke(rpcRequest.getParameters());
-            LOGGER.info("rpc deal with {} , result is {}" , rpcRequest , object);
-            ctx.writeAndFlush(object);
+            RpcResponse rpcResponse = new RpcResponse();
+            try {
+                RpcServiceMeta rpcServiceMeta = RpcServiceRegistry.getRpcServiceMeta(rpcRequest.getServiceClassName());
+                RpcMethodHandler rpcMethodHandler = rpcServiceMeta.getRpcMethodHandler(rpcRequest.getMethodName() , rpcRequest.getParameterTypes());
+                Object object = rpcMethodHandler.invoke(rpcRequest.getParameters());
+                LOGGER.info("rpc deal with {} , result is {}" , rpcRequest , object);
+                rpcResponse.setCode(10000);
+                rpcResponse.setMsg("success");
+                rpcResponse.setData(object);
+                rpcResponse.setRequestId(rpcRequest.getRequestId());
+            } catch (Exception e) {
+                rpcResponse.setCode(99999);
+                rpcResponse.setMsg(e.getMessage());
+                rpcResponse.setData(new Object());
+                rpcResponse.setRequestId(rpcRequest.getRequestId());
+            }
+            ctx.writeAndFlush(rpcResponse);
         } else {
             super.channelRead(ctx, msg);
         }

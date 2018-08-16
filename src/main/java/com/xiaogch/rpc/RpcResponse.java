@@ -12,9 +12,18 @@ package com.xiaogch.rpc;
  */
 public class RpcResponse<T> {
 
+    private Long requestId;
     private int code;
     private String msg;
     private T data;
+
+    public Long getRequestId() {
+        return requestId;
+    }
+
+    public void setRequestId(Long requestId) {
+        this.requestId = requestId;
+    }
 
     public int getCode() {
         return code;
