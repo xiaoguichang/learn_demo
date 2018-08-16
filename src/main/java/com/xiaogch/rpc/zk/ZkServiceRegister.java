@@ -1,11 +1,7 @@
-package com.xiaogch.zk;
+package com.xiaogch.rpc.zk;
 
 import com.alibaba.fastjson.JSONObject;
-import com.xiaogch.common.util.SystemUtil;
-import com.xiaogch.zk.enums.ServiceEnum;
-import com.xiaogch.zk.enums.ServiceEnv;
-import com.xiaogch.zk.enums.ServiceMode;
-import com.xiaogch.zk.enums.ServiceType;
+import com.xiaogch.rpc.meta.ServiceInfo;
 import org.apache.curator.RetryPolicy;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
@@ -17,10 +13,10 @@ import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.ZooDefs;
 import org.apache.zookeeper.data.Stat;
+import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
 
-import java.util.Date;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -35,27 +31,28 @@ import java.util.concurrent.Executors;
  * Description: <BR>
  * Function List:  <BR>
  */
-public class ZkServiceRegister {
+@Service
+public class ZkServiceRegister implements InitializingBean {
 
     private static Logger LOGGER = LogManager.getLogger(ZkServiceRegister.class);
 
-    private String connectUrl = "127.0.0.1:2181";
-    private final String basePath = ZkConstants.ZK_SERVICE_BASE_PATH;
+    @Value("${spring.zookeeper.connectUrl:127.0.0.1:2181}")
+    private String connectUrl;
+
+    @Value("${spring.zookeeper.servicePath:/zk/services}")
+    private String basePath;
+
+    @Value("${spring.zookeeper.connectionTimeout:30000}")
+    private Integer connectionTimeout;
+
+    @Value("${spring.zookeeper.sessionTimeout:30000}")
+    private Integer sessionTimeout;
     private CuratorFramework zkTools;
 
     private ExecutorService threadPool = Executors.newFixedThreadPool(1);
 
     public ZkServiceRegister() {
-        RetryPolicy retryPolicy = new RetryForever(1000);
-        zkTools = CuratorFrameworkFactory.builder()
-                .connectString(connectUrl)
-                .connectionTimeoutMs(30*1000)
-                .sessionTimeoutMs(30*1000)
-                .retryPolicy(retryPolicy)
-                .build();
-        LOGGER.info("############# start zookeeper client connectUrl={} begin." , connectUrl);
-        zkTools.start();
-        LOGGER.info("############# start zookeeper client connectUrl={} end.", connectUrl);
+
     }
 
 
@@ -217,8 +214,15 @@ public class ZkServiceRegister {
         return true;
     }
 
+    public String getConnectUrl() {
+        return connectUrl;
+    }
 
-    public static void main(String[] args) throws InterruptedException {
+    public void setConnectUrl(String connectUrl) {
+        this.connectUrl = connectUrl;
+    }
+
+//    public static void main(String[] args) throws InterruptedException {
 //        ServiceInfo serviceInfo = new ServiceInfo(ServiceEnum.WECHAT);
 //        serviceInfo.setHostAndPort(new HostAndPort(SystemUtil.findLocalHostOrFirstNonLoopbackAddress() , SystemUtil.getPid()));
 //        serviceInfo.setPid(SystemUtil.getPid());
@@ -229,25 +233,38 @@ public class ZkServiceRegister {
 //
 //        ZkServiceRegister zkServiceRegister = new ZkServiceRegister();
 //        zkServiceRegister.registerServiceWithRetryForever(500 , serviceInfo);
+//
+//        List<ServiceInfo> list = new LinkedList<>();
+//
+//        for (int index = 0 ; index < 100000 ; index ++) {
+//            list.add(new ServiceInfo(ServiceEnum.WECHAT));
+//        }
+//
+//        long beginTime = System.currentTimeMillis();
+//        for (ServiceInfo serviceInfo: list) {
+//            serviceInfo.getServiceCode();
+//        }
+//        System.out.println("=== foreach spent " + (System.currentTimeMillis() - beginTime));
+//
+//        beginTime = System.currentTimeMillis();
+//        for (int index = 0 ; index < list.size() ; index ++ ) {
+//            list.get(index).getServiceCode();
+//        }
+//        System.out.println("=== get by index spent " + (System.currentTimeMillis() - beginTime));
+//    }
 
-        List<ServiceInfo> list = new LinkedList<>();
 
-        for (int index = 0 ; index < 100000 ; index ++) {
-            list.add(new ServiceInfo(ServiceEnum.WECHAT));
-        }
-
-        long beginTime = System.currentTimeMillis();
-        for (ServiceInfo serviceInfo: list) {
-            serviceInfo.getServiceCode();
-        }
-        System.out.println("=== foreach spent " + (System.currentTimeMillis() - beginTime));
-
-        beginTime = System.currentTimeMillis();
-        for (int index = 0 ; index < list.size() ; index ++ ) {
-            list.get(index).getServiceCode();
-        }
-        System.out.println("=== get by index spent " + (System.currentTimeMillis() - beginTime));
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        RetryPolicy retryPolicy = new RetryForever(1000);
+        zkTools = CuratorFrameworkFactory.builder()
+                .connectString(connectUrl)
+                .connectionTimeoutMs(30*1000)
+                .sessionTimeoutMs(30*1000)
+                .retryPolicy(retryPolicy)
+                .build();
+        LOGGER.info("############# start zookeeper client connectUrl={} begin." , connectUrl);
+        zkTools.start();
+        LOGGER.info("############# start zookeeper client connectUrl={} end.", connectUrl);
     }
-
-
 }

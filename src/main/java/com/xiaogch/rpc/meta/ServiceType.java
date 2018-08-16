@@ -1,4 +1,4 @@
-package com.xiaogch.zk.enums;
+package com.xiaogch.rpc.meta;
 
 /**
  * ProjectName: demo<BR>
@@ -6,16 +6,18 @@ package com.xiaogch.zk.enums;
  * Author: guich <BR>
  * Project: demo <BR>
  * Version: v 1.0 <BR>
- * Date: 2018/7/23 15:24 <BR>
+ * Date: 2018/7/23 15:22 <BR>
  * Description: <BR>
  * Function List:  <BR>
  */
-public enum ServiceEnv {
+public enum  ServiceType {
 
-    DEVP("开发") , TEST("测试") , PROD("生产");
+    WEB("web服务"), RPC("rpc服务");
 
     public final String name;
-    ServiceEnv(String name) {
+
+    ServiceType(String name) {
         this.name = name;
     }
+
 }

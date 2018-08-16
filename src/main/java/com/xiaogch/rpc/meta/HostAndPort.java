@@ -1,4 +1,4 @@
-package com.xiaogch.zk;
+package com.xiaogch.rpc.meta;
 
 import org.springframework.util.Assert;
 
@@ -13,6 +13,7 @@ import org.springframework.util.Assert;
  * Function List:  <BR>
  */
 public class HostAndPort {
+
     /** Hostname, IPv4/IPv6 literal, or unvalidated nonsense. */
     private String host;
 
@@ -20,6 +21,7 @@ public class HostAndPort {
     private int port;
 
     public HostAndPort() {
+
     }
 
     public HostAndPort(String host, int port) {

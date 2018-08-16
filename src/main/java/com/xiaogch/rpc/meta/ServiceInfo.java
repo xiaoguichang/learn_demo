@@ -1,9 +1,5 @@
-package com.xiaogch.zk;
+package com.xiaogch.rpc.meta;
 
-import com.xiaogch.zk.enums.ServiceEnum;
-import com.xiaogch.zk.enums.ServiceEnv;
-import com.xiaogch.zk.enums.ServiceMode;
-import com.xiaogch.zk.enums.ServiceType;
 
 import java.util.Date;
 
@@ -44,6 +40,7 @@ public class ServiceInfo {
     private HostAndPort hostAndPort;
 
     public ServiceInfo() {
+
     }
 
 
@@ -114,20 +111,5 @@ public class ServiceInfo {
 
     public void setHostAndPort(HostAndPort hostAndPort) {
         this.hostAndPort = hostAndPort;
-    }
-
-    @Override
-    public String toString() {
-        final StringBuffer sb = new StringBuffer("ServiceInfo{");
-        sb.append("pid=").append(pid);
-        sb.append(", startupTime=").append(startupTime);
-        sb.append(", serviceMode=").append(serviceMode);
-        sb.append(", serviceEnv=").append(serviceEnv);
-        sb.append(", serviceType=").append(serviceType);
-        sb.append(", serviceName='").append(serviceName).append('\'');
-        sb.append(", serviceCode='").append(serviceCode).append('\'');
-        sb.append(", hostAndPort=").append(hostAndPort);
-        sb.append('}');
-        return sb.toString();
     }
 }

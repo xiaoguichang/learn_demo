@@ -1,4 +1,4 @@
-package com.xiaogch.zk.enums;
+package com.xiaogch.rpc.meta;
 
 /**
  * ProjectName: demo<BR>

@@ -1,4 +1,4 @@
-package com.xiaogch.zk;
+package com.xiaogch.rpc.zk;
 
 /**
  * ProjectName: demo<BR>

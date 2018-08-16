@@ -1,4 +1,4 @@
-package com.xiaogch.zk;
+package com.xiaogch.rpc.zk;
 
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.recipes.cache.PathChildrenCache;

@@ -11,16 +11,13 @@ public class RpcServiceMeta {
 
 	static Logger LOGGER = LogManager.getLogger(RpcServiceMeta.class);
 
-	private final String className;
 	private final Class clazz;
 	private final Map<String , List<RpcMethodHandler>> methodHandlerMap;
 
-	public RpcServiceMeta(Class clazz , String className, Map<String, List<RpcMethodHandler>> methodHandlerMap) {
+	public RpcServiceMeta(Class clazz , Map<String, List<RpcMethodHandler>> methodHandlerMap) {
 		Assert.notNull(clazz , "clazz can't be null");
-		Assert.hasText(className , "className can't be empty");
 		Assert.notNull(methodHandlerMap , "methodHandlerMap can't be null");
 		this.clazz = clazz;
-		this.className = className;
 		this.methodHandlerMap = methodHandlerMap;
 	}
 
@@ -40,8 +37,8 @@ public class RpcServiceMeta {
 
 		List<RpcMethodHandler> rpcMethodHandlers = methodHandlerMap.get(methodName);
 		if (rpcMethodHandlers == null || rpcMethodHandlers.isEmpty()) {
-			LOGGER.error("no RpcMethodHandler for class={} , method={} , parameterTypes={}" , className , methodName , parameterTypes);
-			throw new IllegalArgumentException("no RpcMethodHandler for class=" + className + " method=" + methodName);
+			LOGGER.error("no RpcMethodHandler for class={} , method={} , parameterTypes={}", clazz.getName() , methodName , parameterTypes);
+			throw new IllegalArgumentException("no RpcMethodHandler for class=" + clazz.getName() + " method=" + methodName);
 		}
 		for (RpcMethodHandler rpcMethodHandler : rpcMethodHandlers) {
 
@@ -72,8 +69,17 @@ public class RpcServiceMeta {
 				return rpcMethodHandler;
 			}
 		}
-		LOGGER.error("no RpcMethodHandler for class={} , method={} , parameterTypes={}" , className , methodName , parameterTypes);
-		throw new IllegalArgumentException("no RpcMethodHandler for class=" + className + " method=" + methodName);
+		LOGGER.error("no RpcMethodHandler for class={} , method={} , parameterTypes={}" , clazz.getName() , methodName , parameterTypes);
+		throw new IllegalArgumentException("no RpcMethodHandler for class=" + clazz.getName() + " method=" + methodName);
 
+	}
+
+
+	public Class getClazz() {
+		return clazz;
+	}
+
+	public Map<String, List<RpcMethodHandler>> getMethodHandlerMap() {
+		return methodHandlerMap;
 	}
 }
