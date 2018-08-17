@@ -73,9 +73,11 @@ public class RpcInvocationHandler implements InvocationHandler {
      */
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-        return null;
+        RpcRequest rpcRequest = new RpcRequest();
+        rpcRequest.setServiceClassName(method.getDeclaringClass().getName());
+        rpcRequest.setMethodName(method.getName());
+        rpcRequest.setParameterTypes(method.getParameterTypes());
+        rpcRequest.setParameters(args);
+        return RpcClient.getConnect(hostAndPort.getHost() , hostAndPort.getPort()).invoke(rpcRequest);
     }
-
-
-
 }

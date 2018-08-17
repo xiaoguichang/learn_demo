@@ -30,19 +30,4 @@ public class HelloServiceImpl implements HelloService {
     public String sayHelloByName(String name) {
         return "hello " + name + " !";
     }
-
-    public static void main(String[] args) {
-       Method[] methods = HelloServiceImpl.class.getDeclaredMethods();
-       for (Method method : methods) {
-           LOGGER.info("==============================");
-           LOGGER.info("method name={}" , method.getName());
-           LOGGER.info("method return type={}" , method.getReturnType().getName());
-           LOGGER.info("method parameter types={}" , method.getParameterTypes());
-//           LOGGER.info("method return type={}" , method.getReturnType().getName());
-//           LOGGER.info("method return type={}" , method.getReturnType().getName());
-           LOGGER.info("==============================\n");
-
-
-       }
-    }
 }

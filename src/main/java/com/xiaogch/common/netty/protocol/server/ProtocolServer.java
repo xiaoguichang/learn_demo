@@ -62,7 +62,7 @@ public class ProtocolServer {
 
     public static void main(String...argvs) throws InterruptedException {
 
-        System.out.println(System.currentTimeMillis());
-        // new ProtocolServer().bind(10002);
+//        System.out.println(System.currentTimeMillis());
+         new ProtocolServer().bind(10002);
     }
 }

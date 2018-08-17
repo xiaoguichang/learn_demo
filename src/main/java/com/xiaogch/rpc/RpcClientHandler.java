@@ -23,9 +23,12 @@ public class RpcClientHandler extends ChannelInboundHandlerAdapter {
 
     private static final long timeout = 60000;
 
-    private ChannelHandlerContext channelHandlerContext;
+    private static ChannelHandlerContext channelHandlerContext;
 
-    private Map<Long , SendRequestCallable> callableMap = new ConcurrentHashMap<>(1000);
+    private static Map<Long , SendRequestCallable> callableMap = new ConcurrentHashMap<>(1000);
+
+    private static ExecutorService executorService = Executors.newFixedThreadPool(3);
+
 
     public RpcClientHandler() {
         super();
@@ -54,7 +57,12 @@ public class RpcClientHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+        if (msg instanceof RpcResponse) {
+            RpcResponse rpcResponse = (RpcResponse) msg;
+            if (rpcResponse != null) {
 
+            }
+        }
         super.channelRead(ctx, msg);
     }
 
@@ -79,10 +87,10 @@ public class RpcClientHandler extends ChannelInboundHandlerAdapter {
     }
 
     public Future<Object> sendRequest(SendRequestCallable sendRequestCallable) {
-        return null;
+        return executorService.submit(sendRequestCallable);
     }
 
-    class SendRequestCallable implements Callable<Object> {
+    static class SendRequestCallable implements Callable<Object> {
 
         private CountDownLatch countDownLatch = new CountDownLatch(1);
         private RpcRequest rpcRequest;
@@ -102,8 +110,16 @@ public class RpcClientHandler extends ChannelInboundHandlerAdapter {
         @Override
         public Object call() throws Exception {
             channelHandlerContext.writeAndFlush(rpcRequest);
-            countDownLatch.await(timeout , TimeUnit.MILLISECONDS);
-            return rpcResponse.getData();
+            try {
+                countDownLatch.await(timeout , TimeUnit.MILLISECONDS);
+                if (rpcResponse != null) {
+                    return rpcResponse.getData();
+                } else {
+                    throw new IllegalStateException("get rpcResponse for rpcRequestId=" + rpcRequest.getRequestId() + " exception");
+                }
+            } finally {
+                callableMap.remove(rpcRequest.getRequestId());
+            }
         }
 
         public void setResult(RpcResponse rpcResponse){
