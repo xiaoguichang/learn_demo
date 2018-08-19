@@ -8,14 +8,12 @@ import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
-import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
+import io.netty.util.concurrent.Future;
+import io.netty.util.concurrent.GenericFutureListener;
 import org.springframework.util.Assert;
 
-import java.lang.reflect.Proxy;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * ProjectName: demo<BR>
@@ -28,40 +26,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * Function List:  <BR>
  */
 public class RpcClient {
-
     private static final int DEFAULT_MAX_FRAME_LENGTH = 1024 * 1024;
-    private static final Map<Class , RpcInvocationHandler> rpcInvocationHandlerMap = new ConcurrentHashMap<>();
-    private static ReentrantLock reentrantLock = new ReentrantLock();
-
-
-    public static <T> T getInstance(HostAndPort hostAndPort , Class<T> clazz) {
-        RpcInvocationHandler rpcInvocationHandler = rpcInvocationHandlerMap.get(clazz);
-        if (rpcInvocationHandler != null) {
-            try {
-                return (T) Proxy.newProxyInstance(clazz.getClassLoader(),
-                        new Class[]{clazz}, rpcInvocationHandler);
-            } catch (Exception e) {
-                e.printStackTrace();
-                throw new RuntimeException(e);
-            }
-        } else {
-            reentrantLock.lock();
-            try {
-                rpcInvocationHandler = rpcInvocationHandlerMap.get(clazz);
-                if (rpcInvocationHandler == null) {
-                    rpcInvocationHandler = new RpcInvocationHandler(hostAndPort);
-                    rpcInvocationHandlerMap.put(clazz , rpcInvocationHandler);
-                }
-                return (T) Proxy.newProxyInstance(clazz.getClassLoader() ,
-                        new Class[]{clazz} , rpcInvocationHandler);
-            } catch (Exception e) {
-                e.printStackTrace();
-                throw new RuntimeException(e);
-            } finally {
-                reentrantLock.unlock();
-            }
-        }
-    }
 
     //已连接主机的缓存
     private static Map<String, RpcClient> clientMap = new HashMap<>();
@@ -70,26 +35,23 @@ public class RpcClient {
 
     private EventLoopGroup group;
 
-    private String ip;
+    private HostAndPort hostAndPort;
 
-    private int port;
-
-    private RpcClient(String ip, int port) {
-        this.ip = ip;
-        this.port = port;
+    private RpcClient(HostAndPort hostAndPort) {
+        this.hostAndPort = hostAndPort;
     }
 
-    public static RpcClient getConnect(String host, int port) throws InterruptedException {
-        if (clientMap.containsKey(host + port)) {
-            return clientMap.get(host + port);
+    public static RpcClient getConnect(HostAndPort hostAndPort) throws InterruptedException {
+        if (clientMap.containsKey(hostAndPort.toString())) {
+            return clientMap.get(hostAndPort.toString());
         }
-        RpcClient con = connect(host, port);
-        clientMap.put(host + port, con);
+        RpcClient con = connect(hostAndPort);
+        clientMap.put(hostAndPort.toString(), con);
         return con;
     }
 
-    private static RpcClient connect(String host, int port) throws InterruptedException {
-        RpcClient client = new RpcClient(host, port);
+    private static RpcClient connect(HostAndPort hostAndPort) throws InterruptedException {
+        RpcClient client = new RpcClient(hostAndPort);
 
         EventLoopGroup group = new NioEventLoopGroup();
         Bootstrap bootstrap = new Bootstrap();
@@ -110,18 +72,21 @@ public class RpcClient {
                     @Override
                     protected void initChannel(SocketChannel ch) throws Exception {
                         ChannelPipeline pipeline = ch.pipeline();
-                        pipeline.addLast("sys_frameDecoder" , new LengthFieldBasedFrameDecoder(
-                                DEFAULT_MAX_FRAME_LENGTH, 0 , 2 ,
-                                0, 2))
-                                .addLast("rpc_responseDecoder" , new RpcResponseDecoder())
-                                .addLast("rpc_commonEncoder" , new RpcCommonEncoder())
+                        pipeline.addLast("rpc_commonEncoder" , new RpcCommonEncoder())
+                                .addLast("rpc_responseDecoder" , new RpcResponseDecoder(DEFAULT_MAX_FRAME_LENGTH, 0 , 2))
                                 .addLast("rpc_clientHandler" , new RpcClientHandler());
                     }
                 });
+        ChannelFuture future = bootstrap.connect(hostAndPort.getHost(), hostAndPort.getPort())
+                .addListener(new GenericFutureListener(){
 
-        ChannelFuture future = bootstrap.connect(host, port).sync();
+                    @Override
+                    public void operationComplete(Future future) throws Exception {
+
+                    }
+                })
+                .sync();
         Channel c = future.channel();
-
         client.setChannel(c);
         client.setGroup(group);
         return client;
@@ -137,7 +102,6 @@ public class RpcClient {
         this.group.shutdownGracefully();
     }
 
-
     public void setChannel(Channel channel) {
         this.channel = channel;
     }
@@ -145,23 +109,5 @@ public class RpcClient {
     public void setGroup(EventLoopGroup group) {
         this.group = group;
     }
-
-    public String getIp() {
-        return ip;
-    }
-
-    public void setIp(String ip) {
-        this.ip = ip;
-    }
-
-    public int getPort() {
-        return port;
-    }
-
-    public void setPort(int port) {
-        this.port = port;
-    }
-
-
 }
 

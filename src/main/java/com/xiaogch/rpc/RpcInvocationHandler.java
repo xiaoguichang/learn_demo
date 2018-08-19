@@ -77,7 +77,15 @@ public class RpcInvocationHandler implements InvocationHandler {
         rpcRequest.setServiceClassName(method.getDeclaringClass().getName());
         rpcRequest.setMethodName(method.getName());
         rpcRequest.setParameterTypes(method.getParameterTypes());
-        rpcRequest.setParameters(args);
-        return RpcClient.getConnect(hostAndPort.getHost() , hostAndPort.getPort()).invoke(rpcRequest);
+        if (args == null) {
+            rpcRequest.setParameters(new Object[0]);
+        } else {
+            rpcRequest.setParameters(args);
+        }
+        RpcClient client = RpcClient.getConnect(hostAndPort);
+        Object result = client.invoke(rpcRequest);
+        return result;
+//        return null;
+//        return RpcClient.getConnect(hostAndPort.getHost() , hostAndPort.getPort()).invoke(rpcRequest);
     }
 }

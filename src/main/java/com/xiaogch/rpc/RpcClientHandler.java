@@ -19,7 +19,7 @@ import java.util.concurrent.atomic.AtomicLong;
  */
 public class RpcClientHandler extends ChannelInboundHandlerAdapter {
 
-    AtomicLong atomicLong = new AtomicLong(0);
+    static AtomicLong atomicLong = new AtomicLong(0);
 
     private static final long timeout = 60000;
 
@@ -58,9 +58,10 @@ public class RpcClientHandler extends ChannelInboundHandlerAdapter {
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
         if (msg instanceof RpcResponse) {
+            System.out.println("received response .......");
             RpcResponse rpcResponse = (RpcResponse) msg;
             if (rpcResponse != null) {
-
+                callableMap.get(rpcResponse.getRequestId()).setResult(rpcResponse);
             }
         }
         super.channelRead(ctx, msg);
@@ -109,7 +110,10 @@ public class RpcClientHandler extends ChannelInboundHandlerAdapter {
          */
         @Override
         public Object call() throws Exception {
+            rpcRequest.setRequestId(atomicLong.getAndIncrement());
+            callableMap.put(rpcRequest.getRequestId() , this);
             channelHandlerContext.writeAndFlush(rpcRequest);
+//            return null;
             try {
                 countDownLatch.await(timeout , TimeUnit.MILLISECONDS);
                 if (rpcResponse != null) {

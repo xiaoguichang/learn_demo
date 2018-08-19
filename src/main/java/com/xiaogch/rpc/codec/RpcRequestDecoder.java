@@ -5,7 +5,13 @@ import com.xiaogch.rpc.util.SerializedUtil;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ByteToMessageDecoder;
+import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
+import org.jboss.marshalling.MarshallerFactory;
+import org.jboss.marshalling.Marshalling;
+import org.jboss.marshalling.MarshallingConfiguration;
+import org.jboss.marshalling.Unmarshaller;
 
+import java.io.IOException;
 import java.util.List;
 
 /**
@@ -18,14 +24,18 @@ import java.util.List;
  * Description: <BR>
  * Function List:  <BR>
  */
-public class RpcRequestDecoder extends ByteToMessageDecoder {
+public class RpcRequestDecoder extends LengthFieldBasedFrameDecoder {
+
+
+    public RpcRequestDecoder(int maxFrameLength, int lengthFieldOffset, int lengthFieldLength) throws IOException {
+        super(maxFrameLength , lengthFieldOffset , lengthFieldLength);
+    }
 
     @Override
-    protected void decode(ChannelHandlerContext channelHandlerContext, ByteBuf byteBuf, List<Object> list) throws Exception {
+    protected Object decode(ChannelHandlerContext ctx, ByteBuf byteBuf) throws Exception {
         byte[] requestData = new byte[byteBuf.readableBytes()];
         byteBuf.readBytes(requestData);
         RpcRequest rpcRequest = SerializedUtil.deserializeByProtostuff(requestData , RpcRequest.class);
-        list.add(rpcRequest);
+        return rpcRequest;
     }
-
 }

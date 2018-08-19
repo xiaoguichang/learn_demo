@@ -1,6 +1,5 @@
 package com.xiaogch.rpc;
 
-import com.xiaogch.rpc.annotation.RpcService;
 import com.xiaogch.rpc.meta.RpcMethodHandler;
 import com.xiaogch.rpc.meta.RpcServiceMeta;
 import io.netty.channel.ChannelHandlerContext;

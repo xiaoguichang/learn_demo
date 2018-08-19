@@ -23,11 +23,14 @@ public class HelloServiceImpl implements HelloService {
     static Logger LOGGER = LogManager.getLogger(HelloServiceImpl.class);
     @Override
     public String sayHello() {
+
+        LOGGER.info("sayHello() be called ...");
         return "hello !";
     }
 
     @Override
     public String sayHelloByName(String name) {
+        LOGGER.info("sayHelloByName() be called ...");
         return "hello " + name + " !";
     }
 }

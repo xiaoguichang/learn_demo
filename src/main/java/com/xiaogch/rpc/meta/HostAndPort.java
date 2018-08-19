@@ -68,10 +68,6 @@ public class HostAndPort {
 
     @Override
     public String toString() {
-        final StringBuffer sb = new StringBuffer("HostAndPort{");
-        sb.append("host='").append(host).append('\'');
-        sb.append(", port=").append(port);
-        sb.append('}');
-        return sb.toString();
+        return host + ":" + port;
     }
 }

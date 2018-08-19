@@ -72,12 +72,12 @@ public abstract class AbstractRpcServer {
                     @Override
                     protected void initChannel(NioSocketChannel nioSocketChannel) throws Exception {
                         nioSocketChannel.pipeline()
-                                .addLast("sys_frameDecoder" , new LengthFieldBasedFrameDecoder(
-                                        DEFAULT_MAX_FRAME_LENGTH, 0 , 2 ,
-                                        0, 2))
-                                .addLast("rpc_requestDecoder" , new RpcRequestDecoder())
-                                .addLast("rpc_commonEncoder" , new RpcCommonEncoder())
-                                .addLast("rpc_InboundHandler" , new RpcServiceInboundHandler());
+//                                .addLast("sys_frameDecoder" , new LengthFieldBasedFrameDecoder(
+//                                        DEFAULT_MAX_FRAME_LENGTH, 0 , 2 ,
+//                                        0, 2))
+                            .addLast("rpc_requestDecoder" , new RpcRequestDecoder(DEFAULT_MAX_FRAME_LENGTH, 0 , 2))
+                            .addLast("rpc_commonEncoder" , new RpcCommonEncoder())
+                            .addLast("rpc_InboundHandler" , new RpcServiceInboundHandler());
                     }
                 });
 

@@ -42,7 +42,7 @@ public class RpcServiceMeta {
 		}
 		for (RpcMethodHandler rpcMethodHandler : rpcMethodHandlers) {
 
-			if (rpcMethodHandler != null) {
+			if (rpcMethodHandler == null) {
 				continue;
 			}
 
@@ -52,7 +52,7 @@ public class RpcServiceMeta {
 			}
 
 			// 参数个数不一致
-			if (parameterTypes.length == rpcMethodHandler.getParameterTypes().length) {
+			if (parameterTypes.length != rpcMethodHandler.getParameterTypes().length) {
 				continue;
 			}
 

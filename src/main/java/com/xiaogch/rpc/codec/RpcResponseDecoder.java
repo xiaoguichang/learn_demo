@@ -6,7 +6,9 @@ import com.xiaogch.rpc.util.SerializedUtil;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ByteToMessageDecoder;
+import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 
+import java.io.IOException;
 import java.util.List;
 
 /**
@@ -19,14 +21,18 @@ import java.util.List;
  * Description: <BR>
  * Function List:  <BR>
  */
-public class RpcResponseDecoder extends ByteToMessageDecoder {
+public class RpcResponseDecoder extends LengthFieldBasedFrameDecoder {
+
+    public RpcResponseDecoder(int maxFrameLength, int lengthFieldOffset, int lengthFieldLength) throws IOException {
+        super(maxFrameLength , lengthFieldOffset , lengthFieldLength);
+    }
 
     @Override
-    protected void decode(ChannelHandlerContext channelHandlerContext, ByteBuf byteBuf, List<Object> list) throws Exception {
+    protected Object decode(ChannelHandlerContext ctx, ByteBuf byteBuf) throws Exception {
         byte[] requestData = new byte[byteBuf.readableBytes()];
         byteBuf.readBytes(requestData);
         RpcResponse response = SerializedUtil.deserializeByProtostuff(requestData , RpcResponse.class);
-        list.add(response);
+        return response;
     }
 
 }
