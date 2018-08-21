@@ -22,7 +22,7 @@ public class RpcServiceClient {
         return RPC_SERVICE_CLIENT_INSTANCE;
     }
 
-    public static <T> T getService(HostAndPort hostAndPort , Class<T> clazz) {
+    public <T> T getService(HostAndPort hostAndPort , Class<T> clazz) {
         RpcInvocationHandler rpcInvocationHandler = rpcInvocationHandlerMap.get(hostAndPort.toString());
         if (rpcInvocationHandler != null) {
             return (T) Proxy.newProxyInstance(clazz.getClassLoader(),

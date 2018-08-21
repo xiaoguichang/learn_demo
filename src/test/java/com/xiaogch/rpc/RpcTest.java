@@ -26,7 +26,7 @@ public class RpcTest {
         try {
             Logger logger = LogManager.getLogger(RpcTest.class);
             HostAndPort hostAndPort = new HostAndPort("127.0.0.1" , 10001);
-            HelloService helloService = RpcClient.getInstance(hostAndPort , HelloService.class);
+            HelloService helloService = RpcServiceClient.getInstance().getService(hostAndPort , HelloService.class);
             String result = helloService.sayHello();
             logger.info("helloService.sayHello() result is {}" ,  result);
 
