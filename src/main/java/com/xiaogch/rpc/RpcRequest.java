@@ -1,5 +1,8 @@
 package com.xiaogch.rpc;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * ProjectName: demo<BR>
  * File name: CommonUtil.java <BR>
@@ -11,7 +14,7 @@ package com.xiaogch.rpc;
  * Function List:  <BR>
  */
 public class RpcRequest {
-
+    private Map<String , String> attributes = new HashMap<>();
     private Long requestId;
     private String serviceClassName;
     private String methodName;
@@ -56,5 +59,23 @@ public class RpcRequest {
 
     public void setParameters(Object[] parameters) {
         this.parameters = parameters;
+    }
+
+    public Map<String, String> getAttributes() {
+        return attributes;
+    }
+
+    public void setAttributes(Map<String, String> attributes) {
+        if (attributes != null) {
+            this.attributes = attributes;
+        }
+    }
+
+    private String getAttribute(String attributeName) {
+        return attributes.get(attributeName);
+    }
+
+    private String setAttribute(String attributeName , String attributeValue) {
+        return attributes.put(attributeName , attributeValue);
     }
 }

@@ -5,10 +5,7 @@ import com.xiaogch.rpc.service.HelloService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Method;
-import java.lang.reflect.Proxy;
-import java.util.concurrent.Executors;
+import java.nio.channels.Channel;
 
 /**
  * ProjectName: demo<BR>

@@ -37,6 +37,9 @@ public class RpcClient {
 
     private HostAndPort hostAndPort;
 
+    private static final Integer NO_WRITER_IDLE_TIMEOUT = 10000;
+    private static final Integer NO_ALL_IDLE_TIMEOUT = 10000;
+
     private RpcClient(HostAndPort hostAndPort) {
         this.hostAndPort = hostAndPort;
     }
@@ -75,14 +78,16 @@ public class RpcClient {
                         pipeline.addLast("rpc_commonEncoder" , new RpcCommonEncoder())
                                 .addLast("rpc_responseDecoder" , new RpcResponseDecoder(DEFAULT_MAX_FRAME_LENGTH, 0 , 2))
                                 .addLast("rpc_clientHandler" , new RpcClientHandler());
+//                                .addLast("idleTimeoutHandler", new IdleStateHandler(NO_WRITER_IDLE_TIMEOUT, NO_WRITER_IDLE_TIMEOUT, NO_ALL_IDLE_TIMEOUT, TimeUnit.MILLISECONDS));
+
+
                     }
                 });
         ChannelFuture future = bootstrap.connect(hostAndPort.getHost(), hostAndPort.getPort())
                 .addListener(new GenericFutureListener(){
-
                     @Override
                     public void operationComplete(Future future) throws Exception {
-
+                        future.get();
                     }
                 })
                 .sync();

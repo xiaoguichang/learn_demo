@@ -2,7 +2,9 @@ package com.xiaogch.rpc;
 
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
+import org.apache.ibatis.annotations.Param;
 
+import java.net.SocketAddress;
 import java.util.Map;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicLong;
@@ -26,6 +28,8 @@ public class RpcClientHandler extends ChannelInboundHandlerAdapter {
     private static ChannelHandlerContext channelHandlerContext;
 
     private static Map<Long , SendRequestCallable> callableMap = new ConcurrentHashMap<>(1000);
+
+    private static Map<Long , RpcSendMessageListener> listenerMap = new ConcurrentHashMap<>(1000);
 
     private static ExecutorService executorService = Executors.newFixedThreadPool(3);
 
@@ -61,7 +65,12 @@ public class RpcClientHandler extends ChannelInboundHandlerAdapter {
             System.out.println("received response .......");
             RpcResponse rpcResponse = (RpcResponse) msg;
             if (rpcResponse != null) {
-                callableMap.get(rpcResponse.getRequestId()).setResult(rpcResponse);
+                if (callableMap.containsKey(rpcResponse.getRequestId())) {
+                    callableMap.get(rpcResponse.getRequestId()).setResult(rpcResponse);
+                }
+                if (listenerMap.containsKey(rpcResponse.getRequestId())) {
+                    listenerMap.get(rpcResponse.getRequestId()).onResponseReceived(rpcResponse);
+                }
             }
         }
         super.channelRead(ctx, msg);
@@ -87,9 +96,37 @@ public class RpcClientHandler extends ChannelInboundHandlerAdapter {
         super.exceptionCaught(ctx, cause);
     }
 
+    public void registerListener(RpcRequest request , RpcSendMessageListener listener) {
+        listenerMap.put(request.getRequestId() , listener);
+    }
+
     public Future<Object> sendRequest(SendRequestCallable sendRequestCallable) {
         return executorService.submit(sendRequestCallable);
     }
+
+    public void sendMessage(RpcRequest request, RpcSendMessageListener listener) {
+
+        registerListener(request , listener);
+
+        try {
+            channelHandlerContext.writeAndFlush(request);
+            if (listenerMap.containsKey(request.getRequestId())) {
+                listenerMap.get(request.getRequestId()).onRequestSent();
+            }
+        } catch (Exception e){
+            SocketAddress socketAddress = channelHandlerContext.channel().remoteAddress();
+            if (listenerMap.containsKey(request.getRequestId())) {
+                listenerMap.get(request.getRequestId()).onChannelError(
+                        new RpcException("send message to remote server=" + socketAddress.toString() + " exception" , e));
+            }
+        }
+    }
+
+    public void removeListener(RpcRequest request) {
+        listenerMap.remove(request.getRequestId());
+    }
+
+
 
     static class SendRequestCallable implements Callable<Object> {
 
