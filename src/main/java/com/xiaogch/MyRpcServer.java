@@ -1,6 +1,6 @@
 package com.xiaogch;
 
-import com.xiaogch.rpc.AbstractRpcServer;
+import com.xiaogch.rpc.server.AbstractRpcServer;
 import com.xiaogch.rpc.meta.ServiceEnum;
 import com.xiaogch.rpc.meta.ServiceEnv;
 import com.xiaogch.rpc.meta.ServiceMode;

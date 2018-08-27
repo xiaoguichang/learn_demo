@@ -1,6 +1,11 @@
-package com.xiaogch.rpc;
+package com.xiaogch.rpc.client;
 
+import com.xiaogch.rpc.RpcException;
+import com.xiaogch.rpc.RpcRequest;
+import com.xiaogch.rpc.RpcResponse;
 import io.netty.channel.Channel;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Future;
@@ -16,6 +21,8 @@ import java.util.concurrent.Future;
  * Function List:  <BR>
  */
 public class RpcClientInvokeHelpers {
+
+    static Logger LOGGER = LogManager.getLogger(RpcClientInvokeHelpers.class);
 
     /**
      * 通过oneWay 的方式调用
@@ -141,6 +148,7 @@ public class RpcClientInvokeHelpers {
            if (exceptionHolder[0] != null) {
                throw exceptionHolder[0];
            }
+           LOGGER.info("request[id={}] , response is {}" , rpcRequest.getRequestId() , responseHolder[0]);
            return responseHolder[0];
         });
     }

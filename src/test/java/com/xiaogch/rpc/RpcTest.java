@@ -1,11 +1,14 @@
 package com.xiaogch.rpc;
 
+import com.xiaogch.entity.SysParameterEntity;
+import com.xiaogch.rpc.client.RpcServiceClient;
 import com.xiaogch.rpc.meta.HostAndPort;
 import com.xiaogch.rpc.service.HelloService;
+import com.xiaogch.rpc.service.SysParameterService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.nio.channels.Channel;
+import java.util.List;
 
 /**
  * ProjectName: demo<BR>
@@ -35,6 +38,13 @@ public class RpcTest {
 
             result = helloService.sayHelloByName("肖贵长");
             logger.info("helloService.sayHelloByName() result is {}" ,  result);
+
+            SysParameterService sysParameterService = RpcServiceClient.getInstance().getService(hostAndPort , SysParameterService.class);
+            SysParameterEntity entity = sysParameterService.getSysParameter("code a");
+            logger.info("sysParameterService.getSysParameter() result is {}" ,  entity);
+
+            List<SysParameterEntity> entityList = sysParameterService.getSysParameterList();
+            logger.info("sysParameterService.getSysParameterList() result is {}" ,  entityList);
 
         } catch (Exception e) {
             e.printStackTrace();

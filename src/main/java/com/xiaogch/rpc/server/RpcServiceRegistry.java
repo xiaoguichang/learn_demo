@@ -1,4 +1,4 @@
-package com.xiaogch.rpc;
+package com.xiaogch.rpc.server;
 
 import com.xiaogch.rpc.meta.RpcServiceMeta;
 import org.apache.logging.log4j.LogManager;

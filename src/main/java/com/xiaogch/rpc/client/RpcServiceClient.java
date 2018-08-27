@@ -1,4 +1,4 @@
-package com.xiaogch.rpc;
+package com.xiaogch.rpc.client;
 
 import com.xiaogch.rpc.meta.HostAndPort;
 

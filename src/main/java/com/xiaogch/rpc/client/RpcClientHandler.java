@@ -1,8 +1,10 @@
-package com.xiaogch.rpc;
+package com.xiaogch.rpc.client;
 
+import com.xiaogch.rpc.RpcException;
+import com.xiaogch.rpc.RpcRequest;
+import com.xiaogch.rpc.RpcResponse;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
-import org.apache.ibatis.annotations.Param;
 
 import java.net.SocketAddress;
 import java.util.Map;
@@ -26,8 +28,6 @@ public class RpcClientHandler extends ChannelInboundHandlerAdapter {
     private static final long timeout = 60000;
 
     private static ChannelHandlerContext channelHandlerContext;
-
-    private static Map<Long , SendRequestCallable> callableMap = new ConcurrentHashMap<>(1000);
 
     private static Map<Long , RpcSendMessageListener> listenerMap = new ConcurrentHashMap<>(1000);
 
@@ -65,9 +65,6 @@ public class RpcClientHandler extends ChannelInboundHandlerAdapter {
             System.out.println("received response .......");
             RpcResponse rpcResponse = (RpcResponse) msg;
             if (rpcResponse != null) {
-                if (callableMap.containsKey(rpcResponse.getRequestId())) {
-                    callableMap.get(rpcResponse.getRequestId()).setResult(rpcResponse);
-                }
                 if (listenerMap.containsKey(rpcResponse.getRequestId())) {
                     listenerMap.get(rpcResponse.getRequestId()).onResponseReceived(rpcResponse);
                 }
@@ -100,10 +97,11 @@ public class RpcClientHandler extends ChannelInboundHandlerAdapter {
         listenerMap.put(request.getRequestId() , listener);
     }
 
-    public Future<Object> sendRequest(SendRequestCallable sendRequestCallable) {
-        return executorService.submit(sendRequestCallable);
-    }
-
+    /**
+     * 发送消息
+     * @param request 请求实体
+     * @param listener 请求监听器
+     */
     public void sendMessage(RpcRequest request, RpcSendMessageListener listener) {
 
         registerListener(request , listener);
@@ -126,48 +124,6 @@ public class RpcClientHandler extends ChannelInboundHandlerAdapter {
         listenerMap.remove(request.getRequestId());
     }
 
-
-
-    static class SendRequestCallable implements Callable<Object> {
-
-        private CountDownLatch countDownLatch = new CountDownLatch(1);
-        private RpcRequest rpcRequest;
-        private RpcResponse rpcResponse;
-
-        public SendRequestCallable(RpcRequest rpcRequest) {
-            this.rpcRequest = rpcRequest;
-        }
-
-        /**
-         * Computes a result, or throws an exception if unable to do so.
-         *
-         * @return computed result
-         *
-         * @throws Exception if unable to compute a result
-         */
-        @Override
-        public Object call() throws Exception {
-            rpcRequest.setRequestId(atomicLong.getAndIncrement());
-            callableMap.put(rpcRequest.getRequestId() , this);
-            channelHandlerContext.writeAndFlush(rpcRequest);
-//            return null;
-            try {
-                countDownLatch.await(timeout , TimeUnit.MILLISECONDS);
-                if (rpcResponse != null) {
-                    return rpcResponse.getData();
-                } else {
-                    throw new IllegalStateException("get rpcResponse for rpcRequestId=" + rpcRequest.getRequestId() + " exception");
-                }
-            } finally {
-                callableMap.remove(rpcRequest.getRequestId());
-            }
-        }
-
-        public void setResult(RpcResponse rpcResponse){
-            this.rpcResponse = rpcResponse;
-            countDownLatch.countDown();
-        }
-    }
 }
 
 

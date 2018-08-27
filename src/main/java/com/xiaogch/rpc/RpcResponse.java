@@ -48,4 +48,15 @@ public class RpcResponse<T> {
     public void setData(T data) {
         this.data = data;
     }
+
+    @Override
+    public String toString() {
+        final StringBuffer sb = new StringBuffer("RpcResponse{");
+        sb.append("requestId=").append(requestId);
+        sb.append(", code=").append(code);
+        sb.append(", msg='").append(msg).append('\'');
+        sb.append(", data=").append(data);
+        sb.append('}');
+        return sb.toString();
+    }
 }

@@ -1,5 +1,7 @@
-package com.xiaogch.rpc;
+package com.xiaogch.rpc.server;
 
+import com.xiaogch.rpc.RpcRequest;
+import com.xiaogch.rpc.RpcResponse;
 import com.xiaogch.rpc.meta.RpcMethodHandler;
 import com.xiaogch.rpc.meta.RpcServiceMeta;
 import io.netty.channel.ChannelHandlerContext;

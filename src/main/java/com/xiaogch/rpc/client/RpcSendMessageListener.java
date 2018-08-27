@@ -1,5 +1,7 @@
-package com.xiaogch.rpc;
+package com.xiaogch.rpc.client;
 
+import com.xiaogch.rpc.RpcException;
+import com.xiaogch.rpc.RpcResponse;
 import org.jboss.netty.buffer.ChannelBuffer;
 
 /**

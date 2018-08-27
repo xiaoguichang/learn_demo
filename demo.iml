@@ -108,7 +108,7 @@
     <orderEntry type="module-library">
       <library name="Maven: com.alibaba:tools:1.8.0">
         <CLASSES>
-          <root url="jar://D:/software/Java/jdk1.8.0_131/lib/tools.jar!/" />
+          <root url="jar://E:/software/Java/jdk1.8.0_144/lib/tools.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />

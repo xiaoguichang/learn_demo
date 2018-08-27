@@ -1,4 +1,4 @@
-package com.xiaogch.rpc;
+package com.xiaogch.rpc.server;
 
 import com.xiaogch.rpc.annotation.RpcMethod;
 import com.xiaogch.rpc.annotation.RpcService;

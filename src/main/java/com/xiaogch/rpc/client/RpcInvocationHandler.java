@@ -1,10 +1,14 @@
-package com.xiaogch.rpc;
+package com.xiaogch.rpc.client;
 
+import com.xiaogch.rpc.RpcRequest;
+import com.xiaogch.rpc.client.RpcClient;
 import com.xiaogch.rpc.meta.HostAndPort;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.UndeclaredThrowableException;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * ProjectName: demo<BR>
@@ -19,6 +23,8 @@ import java.lang.reflect.UndeclaredThrowableException;
 public class RpcInvocationHandler implements InvocationHandler {
 
     private HostAndPort hostAndPort;
+
+    private AtomicLong requestCounter = new AtomicLong(0);
 
     public RpcInvocationHandler(HostAndPort hostAndPort) {
         this.hostAndPort = hostAndPort;
@@ -82,10 +88,9 @@ public class RpcInvocationHandler implements InvocationHandler {
         } else {
             rpcRequest.setParameters(args);
         }
-        RpcClient client = RpcClient.getConnect(hostAndPort);
-        Object result = client.invoke(rpcRequest);
+        rpcRequest.setRequestId(requestCounter.incrementAndGet());
+        RpcClient client = RpcClient.getClient(hostAndPort);
+        Object result = client.syncInvoke(rpcRequest);
         return result;
-//        return null;
-//        return RpcClient.getConnect(hostAndPort.getHost() , hostAndPort.getPort()).invoke(rpcRequest);
     }
 }

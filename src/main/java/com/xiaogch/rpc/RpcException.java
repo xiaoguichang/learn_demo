@@ -10,7 +10,7 @@ package com.xiaogch.rpc;
  * Description: <BR>
  * Function List:  <BR>
  */
-public class RpcException extends Exception {
+public class RpcException extends RuntimeException {
 
     public RpcException() {
         super();
