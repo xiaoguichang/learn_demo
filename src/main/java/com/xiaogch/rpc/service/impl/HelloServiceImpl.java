@@ -5,7 +5,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Service;
 
-import java.lang.reflect.Method;
+import java.util.Date;
+import java.util.List;
 
 /**
  * ProjectName: demo<BR>
@@ -29,9 +30,16 @@ public class HelloServiceImpl implements HelloService {
     }
 
     @Override
-    public String sayHelloByName(String name) {
+    public String sayHelloByName(String name , Integer age , Date birthDay , List<String> addresses) {
         LOGGER.info("sayHelloByName() be called ...");
+        LOGGER.info("name={} age={} birthDay={} addresses={}" , name, age , birthDay , addresses);
         return "hello " + name + " !";
+    }
+
+    @Override
+    public Integer getAge(String name) {
+        LOGGER.info("name={} age is null", name);
+        return null;
     }
 
 

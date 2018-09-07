@@ -1,13 +1,11 @@
 package com.xiaogch.rpc.client;
 
 import com.xiaogch.rpc.RpcRequest;
-import com.xiaogch.rpc.client.RpcClient;
 import com.xiaogch.rpc.meta.HostAndPort;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.UndeclaredThrowableException;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
@@ -82,11 +80,10 @@ public class RpcInvocationHandler implements InvocationHandler {
         RpcRequest rpcRequest = new RpcRequest();
         rpcRequest.setServiceClassName(method.getDeclaringClass().getName());
         rpcRequest.setMethodName(method.getName());
-        rpcRequest.setParameterTypes(method.getParameterTypes());
         if (args == null) {
-            rpcRequest.setParameters(new Object[0]);
+            rpcRequest.setParameterTypesAndValues(method.getParameterTypes() , new Object[0]);
         } else {
-            rpcRequest.setParameters(args);
+            rpcRequest.setParameterTypesAndValues(method.getParameterTypes() , args);
         }
         rpcRequest.setRequestId(requestCounter.incrementAndGet());
         RpcClient client = RpcClient.getClient(hostAndPort);

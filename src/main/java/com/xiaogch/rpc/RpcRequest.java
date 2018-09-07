@@ -1,5 +1,7 @@
 package com.xiaogch.rpc;
 
+import org.springframework.util.Assert;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -14,12 +16,15 @@ import java.util.Map;
  * Function List:  <BR>
  */
 public class RpcRequest {
-    private Map<String , String> attributes = new HashMap<>();
+
     private Long requestId;
     private String serviceClassName;
     private String methodName;
+
     private Class[] parameterTypes;
-    private Object[] parameters;
+    private Map<String , String> attributes = new HashMap<>();
+    private Map<Integer , Object> parameterMaps = new HashMap<>();
+
 
     public Long getRequestId() {
         return requestId;
@@ -45,21 +50,30 @@ public class RpcRequest {
         this.methodName = methodName;
     }
 
-    public Class[] getParameterTypes() {
-        return parameterTypes;
-    }
-
-    public void setParameterTypes(Class[] parameterTypes) {
-        this.parameterTypes = parameterTypes;
-    }
-
     public Object[] getParameters() {
+        if (parameterTypes == null) {
+            return new Object[0];
+        }
+        Object[] parameters = new Object[parameterTypes.length];
+        if (parameterMaps != null) {
+            for(int index = 0 ; index < parameterTypes.length ; index ++) {
+                parameters[index] = parameterMaps.get(index);
+            }
+        }
         return parameters;
     }
 
-    public void setParameters(Object[] parameters) {
-        this.parameters = parameters;
+    public void setParameterTypesAndValues(Class[] types , Object[] values) {
+        Assert.notNull(types , "types can't be null");
+        Assert.notNull(values , "values can't be null");
+        Assert.isTrue(types.length == values.length , "the length of parameterTypes must equal the length of values");
+        parameterMaps.clear();
+        this.parameterTypes = types;
+        for (int i = 0; i < types.length; i++) {
+            parameterMaps.put(i , values[i]);
+        }
     }
+
 
     public Map<String, String> getAttributes() {
         return attributes;
@@ -68,6 +82,8 @@ public class RpcRequest {
     public void setAttributes(Map<String, String> attributes) {
         if (attributes != null) {
             this.attributes = attributes;
+        } else {
+            this.attributes.clear();
         }
     }
 
@@ -77,5 +93,9 @@ public class RpcRequest {
 
     private String setAttribute(String attributeName , String attributeValue) {
         return attributes.put(attributeName , attributeValue);
+    }
+
+    public Class[] getParameterTypes() {
+        return parameterTypes;
     }
 }

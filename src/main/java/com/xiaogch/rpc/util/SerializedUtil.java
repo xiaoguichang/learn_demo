@@ -1,13 +1,17 @@
 package com.xiaogch.rpc.util;
 
-import com.alibaba.fastjson.JSONObject;
-import com.dyuproject.protostuff.LinkedBuffer;
-import com.dyuproject.protostuff.ProtostuffIOUtil;
-import com.dyuproject.protostuff.Schema;
-import com.dyuproject.protostuff.runtime.RuntimeSchema;
+import com.xiaogch.entity.SysParameterEntity;
+import com.xiaogch.entity.UserInfoEntity;
+import com.xiaogch.rpc.RpcRequest;
+import io.protostuff.LinkedBuffer;
+import io.protostuff.ProtostuffIOUtil;
+import io.protostuff.Schema;
+import io.protostuff.runtime.RuntimeSchema;
 import org.springframework.objenesis.Objenesis;
 import org.springframework.objenesis.ObjenesisStd;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -68,5 +72,43 @@ public class SerializedUtil {
         } catch (Exception e) {
             throw new IllegalStateException(e.getMessage(), e);
         }
+    }
+
+
+    public static void main(String[] args) {
+        System.setProperty("protostuff.runtime.allow_null_array_element" , "true");
+        RpcRequest rpcRequest = new RpcRequest();
+        rpcRequest.setParameterTypesAndValues(new Class[]{RpcRequest.class} , new Object[]{new SysParameterEntity() , null , new UserInfoEntity()});
+        byte[] bytes = serializeByProtostuff(rpcRequest);
+
+        RpcRequest newRpcRequest = deserializeByProtostuff(bytes , RpcRequest.class);
+
+        Test test = new Test();
+        test.getList().add(new SysParameterEntity());
+        test.getList().add(null);
+        test.getList().add(new SysParameterEntity());
+        test.getList().add(null);
+        test.getList().add(new SysParameterEntity());
+        test.getList().add(null);
+        test.getList().add(new SysParameterEntity());
+
+        byte[] bytesTest = serializeByProtostuff(test);
+
+//        Test newTest = deserializeByProtostuff(bytesTest , Test.class);
+
+        System.out.println(newRpcRequest);
+    }
+}
+
+class Test {
+
+    List<SysParameterEntity> list = new ArrayList<>();
+
+    public List<SysParameterEntity> getList() {
+        return list;
+    }
+
+    public void setList(List<SysParameterEntity> list) {
+        this.list = list;
     }
 }
