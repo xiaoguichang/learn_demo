@@ -1,5 +1,6 @@
 package com.xiaogch.common.db;
 
+import java.io.Serializable;
 import java.util.List;
 /**
  * ProjectName: demo<BR>
@@ -11,7 +12,10 @@ import java.util.List;
  * Description: <BR>
  * Function List:  <BR>
  */
-public interface BaseService<T> {
+public interface BaseService<D extends BaseDAO<PK, T>, T, PK extends Serializable> extends BaseInsertService<D, T, PK>
+        , BaseUpdateService<D, T, PK>
+        , BaseSelectService<D, T, PK>
+        , BaseDeleteService<D, T, PK> {
 
     int insert(T t);
 

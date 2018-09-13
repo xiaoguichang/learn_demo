@@ -1,7 +1,10 @@
-package com.xiaogch.common.db;
+package com.xiaogch.common.db.impl;
 
-import org.springframework.beans.factory.InitializingBean;
+import com.xiaogch.common.db.BaseDAO;
+import com.xiaogch.common.db.BaseService;
+import org.springframework.beans.factory.annotation.Autowired;
 
+import java.io.Serializable;
 import java.util.List;
 
 /**
@@ -14,23 +17,18 @@ import java.util.List;
  * Description: <BR>
  * Function List:  <BR>
  */
-public abstract class BaseServiceImpl<T> implements BaseService<T> , InitializingBean {
 
+
+public abstract class BaseServiceImpl<D extends BaseDAO<PK , T>, T, PK extends Serializable> implements BaseService<D, T, PK> {
+
+    @Autowired
     private BaseDAO baseDAO;
-
-    public BaseServiceImpl() {
-
-    }
 
     public BaseDAO getBaseDAO() {
         return baseDAO;
     }
 
     public void setBaseDAO(BaseDAO baseDAO) {
-        this.baseDAO = baseDAO;
-    }
-
-    public BaseServiceImpl(BaseDAO baseDAO) {
         this.baseDAO = baseDAO;
     }
 
