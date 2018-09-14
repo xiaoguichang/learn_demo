@@ -1,81 +1,92 @@
 package com.xiaogch.common.util.security;
 
 import com.xiaogch.common.util.ByteUtil;
+import com.xiaogch.common.util.StringFormat;
 
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
+import java.io.UnsupportedEncodingException;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
+import java.util.Random;
 
 /**
- * ProjectName: demo<BR>
- * File name: CommonUtil.java <BR>
- * Author: guich <BR>
- * Project: demo <BR>
- * Version: v 1.0 <BR>
- * Date: 2018/9/12 17:48 <BR>
- * Description: <BR>
- * Function List:  <BR>
+ * 秘钥工具类 支持一下算法:<br/>
+ * 1、AES , DES , ARCFOUR , DESede <br/>
+ * 2、HmacMD5 , HmacSHA1 , HmacSHA224 , HmacSHA256 , HmacSHA384 , HmacSHA512<br/>
  */
 public class SecretKeyUtil {
-
+    private static final String AES = "AES";
+    private static final String DES = "DES";
+    private static final String ARCFOUR = "ARCFOUR";
+    private static final String BLOWFISH = "Blowfish";
+    private static final String DES_EDE = "DESede";
+    private static final String HMAC_MD5 = "HmacMD5";
+    private static final String HMAC_SHA_1 = "HmacSHA1";
+    private static final String HMAC_SHA_224= "HmacSHA224";
+    private static final String HMAC_SHA_384 = "HmacSHA384";
+    private static final String HMAC_SHA_512 = "HmacSHA512";
     /**
      * 生成128位的AES秘钥
-     *
+     * @param format 秘钥格式
      * @throws NoSuchAlgorithmException
+     * @throws UnsupportedEncodingException
      */
-    public static String getAESSecretKey128() throws NoSuchAlgorithmException {
-        KeyGenerator keyGenerator = KeyGenerator.getInstance("AES");
+    public static String getAESSecretKey128(StringFormat format) throws NoSuchAlgorithmException, UnsupportedEncodingException {
+        KeyGenerator keyGenerator = KeyGenerator.getInstance(AES);
         keyGenerator.init(128);
-        return getSecretKey(keyGenerator);
+        return getSecretKey(keyGenerator , format);
     }
 
     /**
      * 生成192位的AES秘钥
-     *
+     * @param format 秘钥格式
      * @throws NoSuchAlgorithmException
+     * @throws UnsupportedEncodingException
      */
-    public static String getAESSecretKey192() throws NoSuchAlgorithmException {
-        KeyGenerator keyGenerator = KeyGenerator.getInstance("AES");
+    public static String getAESSecretKey192(StringFormat format) throws NoSuchAlgorithmException, UnsupportedEncodingException {
+        KeyGenerator keyGenerator = KeyGenerator.getInstance(AES);
         keyGenerator.init(192);
-        return getSecretKey(keyGenerator);
+        return getSecretKey(keyGenerator , format);
     }
 
     /**
      * 生成256位的AES秘钥
-     *
+     * @param format 秘钥格式
      * @throws NoSuchAlgorithmException
+     * @throws UnsupportedEncodingException
      */
-    public static String getAESSecretKey256() throws NoSuchAlgorithmException {
-        KeyGenerator keyGenerator = KeyGenerator.getInstance("AES");
+    public static String getAESSecretKey256(StringFormat format) throws NoSuchAlgorithmException, UnsupportedEncodingException {
+        KeyGenerator keyGenerator = KeyGenerator.getInstance(AES);
         keyGenerator.init(256);
-        return getSecretKey(keyGenerator);
+        return getSecretKey(keyGenerator , format);
     }
 
     /**
      * 生成DES秘钥，DES keySize must be equal to 56
      *
-     * @return
-     *
+     * @param format 秘钥格式
      * @throws NoSuchAlgorithmException
+     * @throws UnsupportedEncodingException
      */
-    public static String getDESSecretKey() throws NoSuchAlgorithmException {
-        KeyGenerator keyGenerator = KeyGenerator.getInstance("DES");
-        return getSecretKey(keyGenerator);
+    public static String getDESSecretKey56(StringFormat format) throws NoSuchAlgorithmException, UnsupportedEncodingException {
+        KeyGenerator keyGenerator = KeyGenerator.getInstance(DES);
+        return getSecretKey(keyGenerator , format);
     }
 
     /**
      * 生成ARCFOUR秘钥
      *
      * @param keyLength 秘钥长度，且只能40-1024只能在之间，包括40 和 1024
-     *
+     * @param format 秘钥格式
      * @throws NoSuchAlgorithmException
+     * @throws UnsupportedEncodingException
      */
-    public static String getARCFOURSecretKey(int keyLength) throws NoSuchAlgorithmException {
-        KeyGenerator keyGenerator = KeyGenerator.getInstance("ARCFOUR");
+    public static String getARCFOURSecretKey(int keyLength , StringFormat format) throws NoSuchAlgorithmException, UnsupportedEncodingException {
+        KeyGenerator keyGenerator = KeyGenerator.getInstance(ARCFOUR);
         keyGenerator.init(keyLength);
-        return getSecretKey(keyGenerator);
+        return getSecretKey(keyGenerator , format);
     }
 
 
@@ -83,98 +94,120 @@ public class SecretKeyUtil {
      * 生成Blowfish秘钥
      *
      * @param keyLength 秘钥长度，8的倍数，且只能32-448只能在之间，包括32 和 448
-     *
+     * @param format 秘钥格式
      * @throws NoSuchAlgorithmException
+     * @throws UnsupportedEncodingException
      */
-    public static String getBlowfishSecretKey(int keyLength) throws NoSuchAlgorithmException {
-        KeyGenerator keyGenerator = KeyGenerator.getInstance("Blowfish");
+    public static String getBlowfishSecretKey(int keyLength , StringFormat format) throws NoSuchAlgorithmException, UnsupportedEncodingException {
+        KeyGenerator keyGenerator = KeyGenerator.getInstance(BLOWFISH);
         keyGenerator.init(keyLength);
-        return getSecretKey(keyGenerator);
+        return getSecretKey(keyGenerator , format);
     }
 
 
     /**
      * 生成112 - Blowfish秘钥
-     *
+     * @param format 秘钥格式
      * @throws NoSuchAlgorithmException
+     * @throws UnsupportedEncodingException
      */
-    public static String getDESedeSecretKey112() throws NoSuchAlgorithmException {
-        KeyGenerator keyGenerator = KeyGenerator.getInstance("DESede");
+    public static String getDESedeSecretKey112(StringFormat format) throws NoSuchAlgorithmException, UnsupportedEncodingException {
+        KeyGenerator keyGenerator = KeyGenerator.getInstance(DES_EDE);
         keyGenerator.init(112);
-        return getSecretKey(keyGenerator);
+        return getSecretKey(keyGenerator, format);
     }
+
 
     /**
      * 生成168 - Blowfish秘钥
-     *
+     * @param format 秘钥格式
      * @throws NoSuchAlgorithmException
+     * @throws UnsupportedEncodingException
      */
-    public static String getDESedeSecretKey168() throws NoSuchAlgorithmException {
-        KeyGenerator keyGenerator = KeyGenerator.getInstance("DESede");
+    public static String getDESedeSecretKey168(StringFormat format) throws NoSuchAlgorithmException, UnsupportedEncodingException {
+        KeyGenerator keyGenerator = KeyGenerator.getInstance(DES_EDE);
         keyGenerator.init(168);
-        return getSecretKey(keyGenerator);
+        return getSecretKey(keyGenerator , format);
     }
+
 
     /**
      * 生成HmacMD5秘钥
      * @param keySize 秘钥长度，大于0的整数
+     * @param format 秘钥格式
      * @throws NoSuchAlgorithmException
+     * @throws UnsupportedEncodingException
      */
-    public static String getHmacMD5SecretKey(int keySize) throws NoSuchAlgorithmException {
-        KeyGenerator keyGenerator = KeyGenerator.getInstance("HmacMD5");
+    public static String getHmacMD5SecretKey(int keySize, StringFormat format) throws NoSuchAlgorithmException, UnsupportedEncodingException {
+        KeyGenerator keyGenerator = KeyGenerator.getInstance(HMAC_MD5);
         keyGenerator.init(keySize);
-        return getSecretKey(keyGenerator);
+        return getSecretKey(keyGenerator , format);
     }
 
     /**
      * 生成HmacSHA1秘钥
      * @param keySize 秘钥长度，大于0的整数
+     * @param format 秘钥格式
      * @throws NoSuchAlgorithmException
+     * @throws UnsupportedEncodingException
      */
-    public static String getHmacSHA1SecretKey(int keySize) throws NoSuchAlgorithmException {
-        KeyGenerator keyGenerator = KeyGenerator.getInstance("HmacSHA1");
+    public static String getHmacSHA1SecretKey(int keySize , StringFormat format) throws NoSuchAlgorithmException, UnsupportedEncodingException {
+        KeyGenerator keyGenerator = KeyGenerator.getInstance(HMAC_SHA_1);
         keyGenerator.init(keySize);
-        return getSecretKey(keyGenerator);
+        return getSecretKey(keyGenerator , format);
     }
-
 
     /**
      * 生成HmacSHA224秘钥
      * @param keySize 秘钥长度，大于等于40的整数
+     * @param format 秘钥格式
      * @throws NoSuchAlgorithmException
+     * @throws UnsupportedEncodingException
      */
-    public static String getHmacSHA224SecretKey(int keySize) throws NoSuchAlgorithmException {
-        KeyGenerator keyGenerator = KeyGenerator.getInstance("HmacSHA224");
+    public static String getHmacSHA224SecretKey(int keySize, StringFormat format) throws NoSuchAlgorithmException, UnsupportedEncodingException {
+        KeyGenerator keyGenerator = KeyGenerator.getInstance(HMAC_SHA_224);
         keyGenerator.init(keySize);
-        return getSecretKey(keyGenerator);
+        return getSecretKey(keyGenerator , format);
     }
 
     /**
      * 生成HmacSHA384秘钥
      * @param keySize 秘钥长度，大于等于40的整数
+     * @param format 秘钥格式
      * @throws NoSuchAlgorithmException
+     * @throws UnsupportedEncodingException
      */
-    public static String getHmacSHA384SecretKey(int keySize) throws NoSuchAlgorithmException {
-        KeyGenerator keyGenerator = KeyGenerator.getInstance("HmacSHA384");
+    public static String getHmacSHA384SecretKey(int keySize , StringFormat format) throws NoSuchAlgorithmException, UnsupportedEncodingException {
+        KeyGenerator keyGenerator = KeyGenerator.getInstance(HMAC_SHA_384);
         keyGenerator.init(keySize);
-        return getSecretKey(keyGenerator);
+        return getSecretKey(keyGenerator , format);
     }
+
 
     /**
      * 生成HmacSHA512秘钥
      * @param keySize 秘钥长度，大于等于40的整数
      * @throws NoSuchAlgorithmException
+     * @throws UnsupportedEncodingException
      */
-    public static String getHmacSHA512SecretKey(int keySize) throws NoSuchAlgorithmException {
-        KeyGenerator keyGenerator = KeyGenerator.getInstance("HmacSHA512");
+    public static String getHmacSHA512SecretKey(int keySize , StringFormat format)
+            throws NoSuchAlgorithmException, UnsupportedEncodingException {
+        KeyGenerator keyGenerator = KeyGenerator.getInstance(HMAC_SHA_512);
         keyGenerator.init(keySize);
-        return getSecretKey(keyGenerator);
+        return getSecretKey(keyGenerator , format);
     }
 
-    private static String getSecretKey(KeyGenerator keyGenerator) {
+    /**
+     * 生成秘钥
+     * @param keyGenerator 秘钥生成器
+     * @param format 秘钥格式
+     * @return
+     * @throws UnsupportedEncodingException
+     */
+    private static String getSecretKey(KeyGenerator keyGenerator , StringFormat format) throws UnsupportedEncodingException {
         SecretKey secretKey = keyGenerator.generateKey();
         byte[] bytes = secretKey.getEncoded();
-        return ByteUtil.encodeHex(bytes);
+        return ByteUtil.bytesToString(bytes , format);
     }
 
 
@@ -229,132 +262,44 @@ public class SecretKeyUtil {
 
     /**
      * 获取公钥
-     * @param keyPair
+     * @param keyPair 秘钥对
+     * @param format 公钥格式
      * @return
+     * @throws UnsupportedEncodingException
      */
-    public static String getPublicKey(KeyPair keyPair){
-        return ByteUtil.encodeHex(keyPair.getPublic().getEncoded());
+    public static String getPublicKey(KeyPair keyPair , StringFormat format) throws UnsupportedEncodingException {
+
+        return ByteUtil.bytesToString(keyPair.getPublic().getEncoded() , format);
     }
+
 
     /**
      * 获取私钥
-     * @param keyPair
+     * @param keyPair 秘钥对
+     * @param format 私钥格式
      * @return
+     * @throws UnsupportedEncodingException
      */
-    public static String getPriviteKey(KeyPair keyPair){
-        return ByteUtil.encodeHex(keyPair.getPrivate().getEncoded());
+    public static String getPrivateKey(KeyPair keyPair , StringFormat format) throws UnsupportedEncodingException {
+        return ByteUtil.bytesToString(keyPair.getPrivate().getEncoded() , format);
     }
 
-//    public static void main(String[] args) throws NoSuchAlgorithmException {
-//
-//        String key;
-//        key = SecretKeyUtil.getAESSecretKey128();
-//        System.out.println("key=" + key + " length=" + key.length() * 4);
-//        key = SecretKeyUtil.getAESSecretKey192();
-//        System.out.println("key=" + key + " length=" + key.length() * 4);
-//        key = SecretKeyUtil.getAESSecretKey256();
-//        System.out.println("key=" + key + " length=" + key.length() * 4);
-//
-//        System.out.println("============ DES ================");
-//        key = SecretKeyUtil.getDESSecretKey();
-//        System.out.println("key=" + key + " length=" + key.length() * 4);
-//
-//        System.out.println("============ ARCFOUR =========== ");
-//        key = SecretKeyUtil.getARCFOURSecretKey(40);
-//        System.out.println("key=" + key + " length=" + key.length() * 4);
-//        key = SecretKeyUtil.getARCFOURSecretKey(1000);
-//        System.out.println("key=" + key + " length=" + key.length() * 4);
-//
-//        System.out.println("============ Blowfish =========== ");
-//        key = SecretKeyUtil.getBlowfishSecretKey(32);
-//        System.out.println("key=" + key + " length=" + key.length() * 4);
-//        key = SecretKeyUtil.getBlowfishSecretKey(448);
-//        System.out.println("key=" + key + " length=" + key.length() * 4);
-//
-//
-//        System.out.println("============ DESede =========== ");
-//        key = SecretKeyUtil.getDESedeSecretKey112();
-//        System.out.println("key=" + key + " length=" + key.length() * 4);
-//        key = SecretKeyUtil.getDESedeSecretKey168();
-//        System.out.println("key=" + key + " length=" + key.length() * 4);
-//
-//        System.out.println("============ HmacMD5 =========== ");
-//        key = SecretKeyUtil.getHmacMD5SecretKey(1);
-//        System.out.println("key=" + key + " length=" + key.length() * 4);
-//
-//        key = SecretKeyUtil.getHmacMD5SecretKey(1000232302);
-//        System.out.println("key=" + key + " length=" + key.length() * 4);
-//
-//
-//        System.out.println("============ HmacSHA1 =========== ");
-//        key = SecretKeyUtil.getHmacSHA1SecretKey(1);
-//        System.out.println("key=" + key + " length=" + key.length() * 4);
-//
-//        key = SecretKeyUtil.getHmacSHA1SecretKey(1000232302);
-//        System.out.println("key=" + key + " length=" + key.length() * 4);
-//
-//
-//        System.out.println("============ HmacSHA224 =========== ");
-//        key = SecretKeyUtil.getHmacSHA224SecretKey(40);
-//        System.out.println("key=" + key + " length=" + key.length() * 4);
-//        key = SecretKeyUtil.getHmacSHA224SecretKey(1000232302);
-//        System.out.println("key=" + key + " length=" + key.length() * 4);
-//
-//        System.out.println("============ HmacSHA384 =========== ");
-//        key = SecretKeyUtil.getHmacSHA384SecretKey(40);
-//        System.out.println("key=" + key + " length=" + key.length() * 4);
-//        key = SecretKeyUtil.getHmacSHA384SecretKey(1000232302);
-//        System.out.println("key=" + key + " length=" + key.length() * 4);
-//
-//
-//        System.out.println("============ HmacSHA512 =========== ");
-//        key = SecretKeyUtil.getHmacSHA512SecretKey(40);
-//        System.out.println("key=" + key + " length=" + key.length() * 4);
-//
-//        key = SecretKeyUtil.getHmacSHA512SecretKey(1000232302);
-//        System.out.println("key=" + key + " length=" + key.length() * 4);
-//
-//        KeyPair keyPair;
-//
-//        System.out.println("============ DiffieHellman =========== ");
-//        keyPair = SecretKeyUtil.getDiffieHellmanKeyPair(512);
-//        System.out.println("public key=" + getPublicKey(keyPair) + " length=" + getPublicKey(keyPair).length() * 4);
-//        System.out.println("private key=" + getPriviteKey(keyPair) + " length=" + getPriviteKey(keyPair).length() * 4);
-//
-//        keyPair = SecretKeyUtil.getDiffieHellmanKeyPair(576);
-//        System.out.println("public key=" + getPublicKey(keyPair) + " length=" + getPublicKey(keyPair).length() * 4);
-//        System.out.println("private key=" + getPriviteKey(keyPair) + " length=" + getPriviteKey(keyPair).length() * 4);
-//
-//        keyPair = SecretKeyUtil.getDiffieHellmanKeyPair(2048);
-//        System.out.println("public key=" + getPublicKey(keyPair) + " length=" + getPublicKey(keyPair).length() * 4);
-//        System.out.println("private key=" + getPriviteKey(keyPair) + " length=" + getPriviteKey(keyPair).length() * 4);
-//
-//        System.out.println("============ DSA =========== ");
-//        keyPair = SecretKeyUtil.getDSAKeyPair(512);
-//        System.out.println("public key=" + getPublicKey(keyPair) + " length=" + getPublicKey(keyPair).length() * 4);
-//        System.out.println("private key=" + getPriviteKey(keyPair) + " length=" + getPriviteKey(keyPair).length() * 4);
-//
-//        keyPair = SecretKeyUtil.getDSAKeyPair(1024);
-//        System.out.println("public key=" + getPublicKey(keyPair) + " length=" + getPublicKey(keyPair).length() * 4);
-//        System.out.println("private key=" + getPriviteKey(keyPair) + " length=" + getPriviteKey(keyPair).length() * 4);
-//
-//        System.out.println("============ RSA =========== ");
-//        keyPair = SecretKeyUtil.getRSAKeyPair(513);
-//        System.out.println("public key=" + getPublicKey(keyPair) + " length=" + getPublicKey(keyPair).length() * 4);
-//        System.out.println("private key=" + getPriviteKey(keyPair) + " length=" + getPriviteKey(keyPair).length() * 4);
-//
-//        keyPair = SecretKeyUtil.getRSAKeyPair(1024);
-//        System.out.println("public key=" + getPublicKey(keyPair) + " length=" + getPublicKey(keyPair).length() * 4);
-//        System.out.println("private key=" + getPriviteKey(keyPair) + " length=" + getPriviteKey(keyPair).length() * 4);
-//
-//        System.out.println("============ EC =========== ");
-//        keyPair = SecretKeyUtil.getECKeyPair(113);
-//        System.out.println("public key=" + getPublicKey(keyPair) + " length=" + getPublicKey(keyPair).length() * 4);
-//        System.out.println("private key=" + getPriviteKey(keyPair) + " length=" + getPriviteKey(keyPair).length() * 4);
-//
-//        keyPair = SecretKeyUtil.getECKeyPair(571);
-//        System.out.println("public key=" + getPublicKey(keyPair) + " length=" + getPublicKey(keyPair).length() * 4);
-//        System.out.println("private key=" + getPriviteKey(keyPair) + " length=" + getPriviteKey(keyPair).length() * 4);
-//
-//    }
+    /**
+     * 生成加密向量
+     * @param format 向量格式
+     * @return
+     * @throws UnsupportedEncodingException
+     */
+    public static String getIV(StringFormat format) throws UnsupportedEncodingException {
+        StringBuilder stringBuilder = new StringBuilder();
+        Random random = new Random(System.currentTimeMillis());
+        // IV must be 16 bytes long
+        for (int index = 0 ; index < 16 ; index ++) {
+            stringBuilder.append(ByteUtil.hexChars[random.nextInt(16)]);
+        }
+        byte[] bytes = ByteUtil.decodeHex(stringBuilder.toString());
+        return ByteUtil.bytesToString(bytes , format);
+    }
+
+
 }

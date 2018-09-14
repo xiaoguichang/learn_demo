@@ -10,7 +10,7 @@
  */
 package com.xiaogch.wechat.common.service.impl;
 
-import com.xiaogch.common.util.MessageDigestUtil;
+import com.xiaogch.common.util.security.MessageDigestUtil;
 import com.xiaogch.wechat.common.service.JssdkJsApiService;
 import com.xiaogch.wechat.common.service.TokenAndTicketService;
 import org.springframework.beans.factory.annotation.Autowired;

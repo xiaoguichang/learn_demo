@@ -5,6 +5,7 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.util.Assert;
 
 import java.io.UnsupportedEncodingException;
+import java.util.Base64;
 import java.util.regex.Pattern;
 
 /**
@@ -80,8 +81,8 @@ public class ByteUtil {
     private static final Pattern hexPattern = Pattern.compile("[0-9a-fA-F]*");
 
     /** 十六进制表示字符集 */
-    private static final char hexChars[] = { '0', '1', '2', '3', '4', '5', '6',
-            '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F' };
+    public static final char hexChars[] = { '0', '1', '2', '3', '4', '5', '6',
+            '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f' };
     /**
      * 将16进制字符串转换成字节数组
      * @param hexSrc 要转换的16进制字符串
@@ -158,5 +159,52 @@ public class ByteUtil {
             chars[2 * i + 1] = hexChars[value & 0x0F];
         }
         return new String(chars);
+    }
+
+
+    /**
+     * 字节数组转换成字符串
+     * @param textBytes 字节数组
+     * @param format 结果格式
+     * @return
+     * @throws UnsupportedEncodingException
+     */
+    public static String bytesToString(byte[] textBytes, StringFormat format) throws UnsupportedEncodingException {
+        if (format != null) {
+            switch (format) {
+                case HEX:
+                    return ByteUtil.encodeHex(textBytes);
+                case BASE64:
+                    return new String(Base64.getEncoder().encode(textBytes) , "utf-8");
+                case COMMON_STRING:
+                    return new String(textBytes , "utf-8");
+                default:
+                    return new String(textBytes , "utf-8");
+            }
+        }
+        return new String(textBytes , "utf-8");
+    }
+
+    /**
+     * 字符串转换成字节数组
+     * @param text 字符串
+     * @param format 结果格式
+     * @return
+     * @throws UnsupportedEncodingException
+     */
+    public static byte[] stringToBytes(String text, StringFormat format) throws UnsupportedEncodingException {
+        if (format != null) {
+            switch (format) {
+                case HEX:
+                    return ByteUtil.decodeHex(text);
+                case BASE64:
+                    return Base64.getDecoder().decode(text);
+                case COMMON_STRING:
+                    return text.getBytes("utf-8");
+                default:
+                    return text.getBytes("utf-8");
+            }
+        }
+        return text.getBytes("utf-8");
     }
 }
