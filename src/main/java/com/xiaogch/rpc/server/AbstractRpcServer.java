@@ -18,7 +18,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.util.Assert;
 
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -47,39 +46,47 @@ public abstract class AbstractRpcServer {
     @Autowired
     ZkServiceRegister zkServiceRegister;
 
+    /**
+     * 启动RPC服务
+     */
     public void start() {
-        int port = getPort();
-        startWithPort(port);
+        startWithPort(getPort(DEFAULT_PORT));
     }
 
+    /**
+     * 启动rpc服务 , 指定端口
+     * @param port
+     */
     public void startWithPort(int port) {
         ServerBootstrap bootstrap = new ServerBootstrap();
         NioEventLoopGroup boss = new NioEventLoopGroup();
         NioEventLoopGroup worker = new NioEventLoopGroup();
 
-        bootstrap.group(boss , worker)
-                .channel(NioServerSocketChannel.class)
-                .option(ChannelOption.SO_BACKLOG , 512)
-                .handler(new LoggingHandler(LogLevel.INFO))
-                .childHandler(new ChannelInitializer<NioSocketChannel>(){
-                    @Override
-                    protected void initChannel(NioSocketChannel nioSocketChannel) throws Exception {
-                        nioSocketChannel.pipeline()
+        bootstrap.group(boss, worker);
+        bootstrap.channel(NioServerSocketChannel.class);
+        bootstrap.option(ChannelOption.SO_BACKLOG, 512);
+        bootstrap.handler(new LoggingHandler(LogLevel.INFO));
+        bootstrap.childHandler(new ChannelInitializer<NioSocketChannel>() {
+            @Override
+            protected void initChannel(NioSocketChannel nioSocketChannel) throws Exception {
+                nioSocketChannel.pipeline()
 //                                .addLast("sys_frameDecoder" , new LengthFieldBasedFrameDecoder(
 //                                        DEFAULT_MAX_FRAME_LENGTH, 0 , 2 ,
 //                                        0, 2))
-                            .addLast("rpc_requestDecoder" , new RpcRequestDecoder(DEFAULT_MAX_FRAME_LENGTH, 0 , 2))
-                            .addLast("rpc_commonEncoder" , new RpcCommonEncoder())
-                            .addLast("rpc_InboundHandler" , new RpcServiceInboundHandler());
-                    }
-                });
+                        .addLast("rpc_requestDecoder", new RpcRequestDecoder(DEFAULT_MAX_FRAME_LENGTH, 0, 2))
+                        .addLast("rpc_commonEncoder", new RpcCommonEncoder())
+                        .addLast("rpc_InboundHandler", new RpcServiceInboundHandler());
+            }
+        });
 
         try {
             ChannelFuture future = bootstrap.bind(port);
             future.sync();
             LOGGER.info("rpc service has started port={}" , port);
+
+            // 服务注册到 zookeeper
             ServiceInfo serviceInfo = new ServiceInfo(getServiceEnum());
-            HostAndPort hostAndPort = new HostAndPort(SystemUtil.findLocalHostOrFirstNonLoopbackAddress(), port);
+            HostAndPort hostAndPort = new HostAndPort(SystemUtil.getIpAddress(), port);
             serviceInfo.setHostAndPort(hostAndPort);
             serviceInfo.setPid(SystemUtil.getPid());
             serviceInfo.setStartupTime(new Date());
@@ -101,14 +108,6 @@ public abstract class AbstractRpcServer {
 
     }
 
-    public void registerService(RpcServiceMeta rpcServiceMeta) {
-        Assert.notNull(rpcServiceMeta , "rpcServiceMeta can;t be null");
-        RpcServiceRegistry.registerRpcServiceMeta(rpcServiceMeta);
-    }
-
-    private int getPort() {
-        return getPort(DEFAULT_PORT);
-    }
 
     /**
      * 获取端口
@@ -130,9 +129,28 @@ public abstract class AbstractRpcServer {
         throw new IllegalArgumentException("no usable port");
     }
 
+    /**
+     * 服务模式
+     * @return
+     */
     public abstract ServiceMode getServiceMode();
+
+    /**
+     * 服务类型
+     * @return
+     */
     public abstract ServiceType getServiceType();
+
+    /**
+     * 服务环境
+     * @return
+     */
     public abstract ServiceEnv getServiceEnv();
+
+    /**
+     * 服务信息
+     * @return
+     */
     public abstract ServiceEnum getServiceEnum();
 
 }

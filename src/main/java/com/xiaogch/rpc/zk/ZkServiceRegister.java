@@ -222,38 +222,6 @@ public class ZkServiceRegister implements InitializingBean {
         this.connectUrl = connectUrl;
     }
 
-//    public static void main(String[] args) throws InterruptedException {
-//        ServiceInfo serviceInfo = new ServiceInfo(ServiceEnum.WECHAT);
-//        serviceInfo.setHostAndPort(new HostAndPort(SystemUtil.findLocalHostOrFirstNonLoopbackAddress() , SystemUtil.getPid()));
-//        serviceInfo.setPid(SystemUtil.getPid());
-//        serviceInfo.setServiceEnv(ServiceEnv.DEVP);
-//        serviceInfo.setServiceMode(ServiceMode.GRAY);
-//        serviceInfo.setServiceType(ServiceType.RPC);
-//        serviceInfo.setStartupTime(new Date());
-//
-//        ZkServiceRegister zkServiceRegister = new ZkServiceRegister();
-//        zkServiceRegister.registerServiceWithRetryForever(500 , serviceInfo);
-//
-//        List<ServiceInfo> list = new LinkedList<>();
-//
-//        for (int index = 0 ; index < 100000 ; index ++) {
-//            list.add(new ServiceInfo(ServiceEnum.WECHAT));
-//        }
-//
-//        long beginTime = System.currentTimeMillis();
-//        for (ServiceInfo serviceInfo: list) {
-//            serviceInfo.getServiceCode();
-//        }
-//        System.out.println("=== foreach spent " + (System.currentTimeMillis() - beginTime));
-//
-//        beginTime = System.currentTimeMillis();
-//        for (int index = 0 ; index < list.size() ; index ++ ) {
-//            list.get(index).getServiceCode();
-//        }
-//        System.out.println("=== get by index spent " + (System.currentTimeMillis() - beginTime));
-//    }
-
-
     @Override
     public void afterPropertiesSet() throws Exception {
         RetryPolicy retryPolicy = new RetryForever(1000);

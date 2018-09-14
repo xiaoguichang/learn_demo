@@ -10,13 +10,10 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
- * ProjectName: demo<BR>
- * File name: CommonUtil.java <BR>
  * Author: guich <BR>
- * Project: demo <BR>
  * Version: v 1.0 <BR>
- * Date: 2018/8/16 16:48 <BR>
- * Description: <BR>
+ * Date: 2018/8/15 19:21 <BR>
+ * Description: RPC方法注册类 <BR>
  * Function List:  <BR>
  */
 public class RpcServiceRegistry {
@@ -27,6 +24,11 @@ public class RpcServiceRegistry {
 
     private static final ReentrantLock reentrantLock = new ReentrantLock();
 
+    /**
+     * 获取RPC 服务
+     * @param className 类名
+     * @return
+     */
     public static RpcServiceMeta getRpcServiceMeta(String className) {
         Assert.notNull("clazz" , "clazz can't be null");
         if (rpcServiceMetaMap.containsKey(className)) {
@@ -35,6 +37,11 @@ public class RpcServiceRegistry {
         throw new IllegalArgumentException("can't find RpcServiceMeta for " + className);
     }
 
+    /**
+     * 注册RPC 服务
+     * @param rpcServiceMeta
+     * @return
+     */
     public static boolean registerRpcServiceMeta(RpcServiceMeta rpcServiceMeta) {
         Assert.notNull("rpcServiceMeta" , "rpcServiceMeta can't be null");
         Assert.notNull(rpcServiceMeta.getClazz() , "attribute clazz of rpcServiceMeta can't be null");

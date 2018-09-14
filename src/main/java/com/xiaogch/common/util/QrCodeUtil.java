@@ -1,34 +1,25 @@
-package com.xiaogch.common.util;/**
- * 文件名： ${file_name}
- * 工程名称: ${project_name}
- * Shang De
- * 创建日期： ${date}
- * Copyright(C) ${year}, by guodk
- * 原始作者: 郭狄楷
- */
+package com.xiaogch.common.util;
 
-import com.google.zxing.*;
+import com.google.zxing.BarcodeFormat;
+import com.google.zxing.EncodeHintType;
+import com.google.zxing.WriterException;
 import com.google.zxing.common.BitMatrix;
 import com.google.zxing.qrcode.QRCodeWriter;
 import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Hashtable;
 
-/**
- * 二维码生成工具类
- * @author
- * @create 2017-11-28 14:22
- **/
 
 public class QrCodeUtil {
 
+    static Logger LOGGER = LogManager.getLogger(QrCodeUtil.class);
     /**
      * 生成包含字符串信息的二维码图片
      * @param outputStream 文件输出流路径
@@ -66,16 +57,8 @@ public class QrCodeUtil {
             }
             ImageIO.write(image, imageFormat, outputStream);
         }catch (Exception ex) {
-            ex.printStackTrace();
+            LOGGER.error(ex.getMessage() , ex);
         }
     }
 
-    /**
-     * 测试代码
-     * @throws WriterException
-     */
-    public static void main(String[] args) throws IOException, WriterException {
-
-        createQrCode(new FileOutputStream(new File("d:\\qrcode.png")),"http://www.baidu.com",280,"png");
-    }
 }

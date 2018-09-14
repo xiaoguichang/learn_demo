@@ -10,13 +10,10 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 /**
- * ProjectName: demo<BR>
- * File name: CommonUtil.java <BR>
  * Author: guich <BR>
- * Project: demo <BR>
  * Version: v 1.0 <BR>
- * Date: 2018/8/16 16:46 <BR>
- * Description: <BR>
+ * Date: 2018/8/15 19:21 <BR>
+ * Description: Rpc 服务处理类 <BR>
  * Function List:  <BR>
  */
 public class RpcServiceInboundHandler extends ChannelInboundHandlerAdapter {

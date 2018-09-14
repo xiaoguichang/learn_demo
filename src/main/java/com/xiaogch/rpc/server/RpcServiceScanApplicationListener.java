@@ -18,13 +18,10 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * ProjectName: demo<BR>
- * File name: CommonUtil.java <BR>
  * Author: guich <BR>
- * Project: demo <BR>
  * Version: v 1.0 <BR>
  * Date: 2018/8/15 19:21 <BR>
- * Description: <BR>
+ * Description: 服务启动时 自动扫描注册RPC服务，并启动RPC服务 <BR>
  * Function List:  <BR>
  */
 public class RpcServiceScanApplicationListener implements ApplicationListener<ApplicationReadyEvent> {
@@ -35,9 +32,10 @@ public class RpcServiceScanApplicationListener implements ApplicationListener<Ap
     public void onApplicationEvent(ApplicationReadyEvent event) {
         ApplicationContext context = event.getApplicationContext();
         Map<String , Object> beans = context.getBeansWithAnnotation(RpcService.class);
+
+        // 扫描 RPC 方法
         LOGGER.info("@@@@@ get beans for RpcService Annotation beans size is {}" , beans == null ? 0 : beans.size());
         if (beans != null) {
-//            List<RpcServiceMeta> rpcServiceMetas = new ArrayList<>();
             beans.forEach((String key , Object object) -> {
                 Class clazz = object.getClass();
                 Class[] interfaces = clazz.getInterfaces();
@@ -55,14 +53,21 @@ public class RpcServiceScanApplicationListener implements ApplicationListener<Ap
             });
         }
 
+
         AbstractRpcServer abstractRpcServer = context.getBean(AbstractRpcServer.class);
         LOGGER.info("scan AbstractRpcServer result is {}" , abstractRpcServer);
+        // 启动RPC 服务
         if (abstractRpcServer != null) {
             abstractRpcServer.start();
         }
     }
 
-
+    /**
+     * 解析rpc服务信息
+     * @param clazz rpc 服务类
+     * @param target 目标类
+     * @return
+     */
     private RpcServiceMeta resolveRpcServiceMeta(Class clazz , Object target) {
         Map<String , List<RpcMethodHandler>> stringListMap = new HashMap<>();
         Method[] methods = clazz.getMethods();
